@@ -105,7 +105,7 @@ for (fi in 1:F_n) {
     # Incorporate the SRR into the following calculations
     # Recruitment (equilibrium recruitment based on SSB/R at F, and R_eq)
     R_eq[fi] <- local({
-      BC<-exp(rec_sigma^2/2.0)              #multiplicative bias correction
+      BC<-exp(rec_sigma^2/2.0)              # multiplicative bias correction
       #R_eq_i <- (R0*(spr[fi]*4*h*BC-phi0*(1-h)))/(spr[fi]*(5*h-1))
       R_eq_i <- (R0/((5*h-1.0)*spr[fi]))*(BC*4.0*h*spr[fi]-phi0 *(1.0-h))
       ifelse(R_eq_i<1e-7, 1e-7, R_eq_i)   # I think this just keeps R_eq_i from getting too close to zero.

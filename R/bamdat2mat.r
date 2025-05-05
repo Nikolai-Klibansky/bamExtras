@@ -7,6 +7,8 @@
 #' @param writeFiles File extension of files to write output data to. Current options include "csv".
 #' Set to any other value to run the function without writing output.
 #' @param writeFiles_dir Name of directory to write files to.
+#' @param prompt_me Turn on/off prompts that ask for user input before deleting files
+#' @param nm_out_exclude Names of output objects to exclude. By default, excludes age and length composition matrices converted to numbers of fish which are computed in this function. BAM uses comp matrices in proportions.
 #' @keywords bam stock assessment fisheries
 #' @export
 #' @returns Silently returns a \code{list} of all data objects,
@@ -46,7 +48,8 @@
 bamdat2mat <- function(CommonName=NULL,bam=NULL,
                       writeFiles="csv",
                       writeFiles_dir=paste("bamdat2mat",writeFiles,sep="_"),
-                      prompt_me=TRUE # Turn on/off prompts that ask for user input before deleting files.
+                      prompt_me=TRUE,
+                      nm_out_exclude=c("obs_agec_nfish","obs_lenc_nfish")
 ){
   if(!is.null(CommonName)){
     bam <- bam2r(CommonName)
@@ -504,6 +507,8 @@ bamdat2mat <- function(CommonName=NULL,bam=NULL,
     age_error=age_error
   ),
   out_list_misc)
+
+  out <- out[!names(out)%in%nm_out_exclude]
 
   if(length(misc_2_mat)>0){
     txt1 <- ifelse(length(misc_2_mat)==1,"matrix","matrices")

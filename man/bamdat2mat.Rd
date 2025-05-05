@@ -9,7 +9,8 @@ bamdat2mat(
   bam = NULL,
   writeFiles = "csv",
   writeFiles_dir = paste("bamdat2mat", writeFiles, sep = "_"),
-  prompt_me = TRUE
+  prompt_me = TRUE,
+  nm_out_exclude = c("obs_agec_nfish", "obs_lenc_nfish")
 )
 }
 \arguments{
@@ -21,6 +22,10 @@ bamdat2mat(
 Set to any other value to run the function without writing output.}
 
 \item{writeFiles_dir}{Name of directory to write files to.}
+
+\item{prompt_me}{Turn on/off prompts that ask for user input before deleting files}
+
+\item{nm_out_exclude}{Names of output objects to exclude. By default, excludes age and length composition matrices converted to numbers of fish which are computed in this function. BAM uses comp matrices in proportions.}
 }
 \value{
 Silently returns a \code{list} of all data objects,

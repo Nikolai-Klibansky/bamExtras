@@ -176,17 +176,18 @@ Then we can compare the two models
 ## Conduct a catch curve analysis
 
 ```{r}
-# read in black ses bass age comps used in the recent stock assessment
+# read in black sea bass age compositions used in the recent stock assessment
 rdat <- rdat_BlackSeaBass
 comp <- rdat$comp.mats # List of composition matrices
 acomp <- comp[grepl("^acomp.*.ob$",names(comp))] # list of observed age composition matrices
-comp_i <- acomp$acomp.Mcvt.ob
+nm_comp_i <- names(which.max(lapply(acomp,nrow))) # Get the name of the age comps with the most years of data
+comp_i <- acomp[[nm_comp_i]]
 cc_i <- catch_curve(comp_i)
 # Plot comps and add catch curves (note the log-tranformation of the composition data)
-comp_plot(log(comp_i),cc=cc_i,fillComp = FALSE,ylab= "log(proportion)",xlab="age",title="black sea bass commercial handline catch curves")
+comp_plot(log(comp_i),cc=cc_i,fillComp = FALSE,ylab= "log(proportion)",xlab="age",title=paste("catch curves for",nm_comp_i))
 # Plot Z estimates over time for multiple sets of age compositions
 par(mfrow=c(1,1),mgp=c(1,.2,0),mar=c(2,2,1,1),oma=c(0,0,0,0),tck=0.01)
-M <- rdat$parms$M.msst
+M <- rdat$parms$M.constant
 cc <- lapply(acomp,catch_curve)
 abb <- gsub("^(acomp.)|(.ob)$","",names(cc)) # abbreviations of age composition fleets
 cols <- rainbow(length(cc))
