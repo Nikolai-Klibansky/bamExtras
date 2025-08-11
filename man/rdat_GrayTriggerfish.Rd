@@ -3,13 +3,13 @@
 \docType{data}
 \name{rdat_GrayTriggerfish}
 \alias{rdat_GrayTriggerfish}
-\title{BAM stock assessment results (rdat file): South Atlantic Gray Triggerfish (SEDAR 41)}
+\title{BAM stock assessment results (rdat file): South Atlantic Gray Triggerfish (SEDAR 82)}
 \format{
 An object of class \code{"list"}
 }
 \source{
-SEDAR 41 Stock Assessment Report South Atlantic Gray Triggerfish
-(\href{http://sedarweb.org/docs/sar/S41_SA_GTF_SAR_Final_4.19.2016.pdf}{PDF})
+SEDAR 82 Stock Assessment Report South Atlantic Gray Triggerfish
+(\href{https://sedarweb.org/documents/sedar-82-south-atlantic-gray-triggerfish-final-stock-assessment-report/}{PDF})
 }
 \usage{
 rdat_GrayTriggerfish

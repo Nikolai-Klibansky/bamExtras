@@ -40,13 +40,13 @@
 #' (\href{http://sedarweb.org/docs/sar/SEDAR_71_SAR_4.19.21_final_withaddendum.pdf}{PDF})
 "rdat_GagGrouper"
 
-#' BAM stock assessment results (rdat file): South Atlantic Gray Triggerfish (SEDAR 41)
+#' BAM stock assessment results (rdat file): South Atlantic Gray Triggerfish (SEDAR 82)
 #'
 #' Data stored in the standard rdat file output by the Beaufort Assessment Model (BAM)
 #' @format An object of class \code{"list"}
 #'
-#' @source SEDAR 41 Stock Assessment Report South Atlantic Gray Triggerfish
-#' (\href{http://sedarweb.org/docs/sar/S41_SA_GTF_SAR_Final_4.19.2016.pdf}{PDF})
+#' @source SEDAR 82 Stock Assessment Report South Atlantic Gray Triggerfish
+#' (\href{https://sedarweb.org/documents/sedar-82-south-atlantic-gray-triggerfish-final-stock-assessment-report/}{PDF})
 "rdat_GrayTriggerfish"
 
 
@@ -99,6 +99,14 @@
 #' (\href{http://sedarweb.org/docs/sar/SEDAR73_SARedSnapper_FullSAR_V3_0.pdf}{PDF})
 "rdat_RedSnapper"
 
+#' BAM stock assessment results (rdat file): Atlantic Scamp Grouper (SEDAR 68)
+#'
+#' Data stored in the standard rdat file output by the Beaufort Assessment Model (BAM)
+#' @format An object of class \code{"list"}
+#'
+#' @source SEDAR 68 Stock Assessment Report Atlantic Scamp Grouper
+#' (\href{https://sedarweb.org/documents/sedar-68-atlantic-scamp-final-stock-assessment-report/}{PDF})
+"rdat_ScampGrouper"
 
 #' BAM stock assessment results (rdat file): South Atlantic Snowy Grouper (SEDAR 36 Update 2020)
 #'

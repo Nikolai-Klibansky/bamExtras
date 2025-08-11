@@ -1,6 +1,6 @@
 Package: bamExtras
 Title: Functions and Data in Support of Stock Assessments with the Beaufort Assessment Model (BAM)
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     person(given = "Nikolai",
            family = "Klibansky",
@@ -14,7 +14,7 @@ Encoding: UTF-8
 LazyData: true
 BuildVignettes: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Depends:
 	doParallel,
 	foreach,

@@ -1,0 +1,501 @@
+---
+title: "Calculating reference points"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calculating reference points}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height= 7
+)
+```
+
+```{r setup, echo=FALSE,message=FALSE}
+library(bamExtras)
+```
+
+# Introduction
+
+The purpose of this vignette is to demonstrate how reference points can be calculated using thr `bamExtras::F_calc` function. There are a couple of examples in the `F_calc` help file, but this vignette provides examples for all stock assessments loaded into the `bamExtras` package.
+
+## Atlantic Menhaden
+
+```{r}
+rdat <- rdat_AtlanticMenhaden
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wholewgt.wgted.L.mt,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=3,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+```
+
+## Black Sea Bass
+
+```{r}
+rdat <- rdat_BlackSeaBass
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=6,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$Mean.biascorr*pr$Mean.R0,
+       Px=0.5
+       )
+F50 <- c(bam=rdat$spr.brps$F50,bamExtras=Fcout$RefPts$F_Px)
+F50
+```
+
+## Cobia
+
+```{r}
+rdat <- rdat_Cobia
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$steep,
+       R0=pr$R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=3,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$Mean.biascorr*pr$Mean.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+```
+
+## Gag
+
+```{r}
+rdat <- rdat_GagGrouper
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb.gut,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+```
+
+## Gray triggerfish
+
+```{r}
+rdat <- rdat_GrayTriggerfish
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$Mean.biascorr*pr$Mean.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+```
+
+## Greater amberjack
+
+```{r}
+rdat <- rdat_GreaterAmberjack
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+
+```
+
+## Red grouper
+
+```{r}
+rdat <- rdat_RedGrouper
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+
+```
+
+## Red porgy
+
+```{r}
+rdat <- rdat_RedPorgy
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+
+```
+
+## Red Snapper
+
+```{r }
+# When there is no SRR, the function will still compute SPR without computing MSY-based equilibrium values
+rdat <- rdat_RedSnapper
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(age=as$age,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wholewgt.wgted.L.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=rdat$parms$spawn.time,
+       plot_digits=4,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$Mean.biascorr*pr$Mean.R0,
+       F_n=1001
+       )
+
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+# 
+# Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+# Fmsy
+```
+
+## Scamp Grouper
+
+```{r}
+rdat <- rdat_ScampGrouper
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=0.6,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$Mean.biascorr*pr$Mean.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+# 
+# Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+# Fmsy
+
+```
+
+## Snowy Grouper
+
+```{r}
+rdat <- rdat_SnowyGrouper
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=0.6,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+
+```
+
+## Spanish Mackerel
+
+```{r}
+rdat <- rdat_SpanishMackerel
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wholewgt.wgted.L.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+
+```
+
+## Tilefish
+
+```{r}
+rdat <- rdat_Tilefish
+pr <- rdat$parms
+as <- rdat$a.series
+
+Fcout <- F_calc(
+       age=as$age,
+       rec_sigma=pr$R.sigma.par,
+       h=pr$BH.steep,
+       R0=pr$BH.R0,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wgt.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=pr$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001,
+       N_ast_ob=as.numeric(tail(rdat$N.age.spawn,1)),
+       R_neq=pr$BH.biascorr*pr$BH.R0,
+       Px=0.4
+       )
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+
+```
+
+
+## Vermilion Snapper
+
+```{r}
+rdat <- rdat_VermilionSnapper
+pr <- rdat$parms
+as <- rdat$a.series
+
+# pdout <- pop_demo(
+#        Fi=pr$F30,
+#        age=as$age,
+#        h=pr$BH.steep,
+#        R0=pr$R0,
+#        rec_sigma=rdat$parms$R.sigma.par,
+#        M=as$M,
+#        sel_L=rdat$sel.age$sel.v.wgted.L,
+#        sel_D=rdat$sel.age$sel.v.wgted.D,
+#        PS=rep(1,length(as$age)),
+#        w=as$wholewgt.wgted.L.klb,
+#        ep=as$reprod,
+#        plots=TRUE,
+#        P_st=rdat$parms$spawn.time,
+#        plot_digits=4)
+# pdout
+
+Fcout <- F_calc(age=as$age,
+       h=pr$BH.steep,
+       R0=pr$R0,
+       rec_sigma=rdat$parms$R.sigma.par,
+       M=as$M,
+       sel_L=rdat$sel.age$sel.v.wgted.L,
+       sel_D=rdat$sel.age$sel.v.wgted.D,
+       PS=rep(1,length(as$age)),
+       w=as$wholewgt.wgted.L.klb,
+       ep=as$reprod,
+       plots=TRUE,
+       P_st=rdat$parms$spawn.time,
+       plot_digits=4,
+       Fmax=1,
+       F_n=1001)
+F40 <- c(bam=rdat$spr.brps$F40,bamExtras=Fcout$RefPts$F_Px)
+F40
+
+Fmsy <- c(bam=pr$Fmsy,bamExtras=Fcout$RefPts$Fmsy)
+Fmsy
+
+```
+

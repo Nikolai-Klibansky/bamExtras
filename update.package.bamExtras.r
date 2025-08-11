@@ -23,8 +23,9 @@ library(stringr)
 # Create package3
 #create("bamExtras") # I think you only need to do this once
 
-# Create vignette (only run to create vignette)
+# Create vignette (only run to initially create a vignette)
 #usethis::use_vignette("intro")
+#usethis::use_vignette(name="RefPtCalc",title="Calculating reference points")
 
 # Add dependencies
 #usethis::use_package("stringr","Suggests")

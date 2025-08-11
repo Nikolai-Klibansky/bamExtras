@@ -179,8 +179,20 @@ if(!is.null(run_bam_args)){
   rdat <- run_bam_out$rdat
 }
 
+### Get parts of the rdat used later in the function and compute stuff
   # if(!is.null(rdat)){
    parms <- rdat$parms
+   a.series <- rdat$a.series
+   t.series <- rdat$t.series
+   parm.cons <- rdat$parm.cons
+   sel_age <- rdat$sel.age
+   CLD.est.mats <- rdat$CLD.est.mats
+   Z.age <- rdat$Z.age
+   N.age <- rdat$N.age
+   N.age.mdyr <- rdat$N.age.mdyr
+   size.age.fishery <- rdat$size.age.fishery
+   comp.mats <- rdat$comp.mats
+
    nm_parms <- names(parms)
 
     styr <- parms$styr
@@ -188,8 +200,6 @@ if(!is.null(run_bam_args)){
     yb <- styr:endyr # years of the base model
     nyb <- length(yb)
 
-    a.series <- rdat$a.series
-    t.series <- t.series.raw <- rdat$t.series
     if(any(unlist(t.series)%in%t_series_na_vals)){
       t.series <- apply(t.series,2,
                         function(x){x[x%in%t_series_na_vals] <- NA
@@ -199,8 +209,7 @@ if(!is.null(run_bam_args)){
       message(paste0("values in t.series in the set '", paste(t_series_na_vals,collapse=", "), "' found and changed to NA"))
     }
     # t.series[t.series==-99999] <- NA
-    parm.cons <- rdat$parm.cons
-    sel_age <- rdat$sel.age
+
     sel_age_1 <- sel_age[names(sel_age)%in%c("sel.v.wgted.L","sel.v.wgted.D","sel.v.wgted.tot")]
     sel_age_2 <- sel_age[!names(sel_age)%in%names(sel_age_1)]
 
@@ -214,19 +223,19 @@ if(!is.null(run_bam_args)){
     # L/(N*(1-exp(-Z))) = F/Z
     # L*Z/(N*(1-exp(-Z))) = F
     # F = L*Z/(N*(1-exp(-Z)))
-    Cn <- rdat$CLD.est.mats[names(rdat$CLD.est.mats)[grepl("^(Ln|Dn)((?!total).)*$",names(rdat$CLD.est.mats),perl=TRUE)]]
+    Cn <- CLD.est.mats[names(CLD.est.mats)[grepl("^(Ln|Dn)((?!total).)*$",names(CLD.est.mats),perl=TRUE)]]
     names(Cn) <- gsub("^([LD])(n)(.*)","Cn.\\1\\3",names(Cn))
-    Cw <- rdat$CLD.est.mats[names(rdat$CLD.est.mats)[grepl("^(Lw|Dw)((?!total).)*$",names(rdat$CLD.est.mats),perl=TRUE)]]
+    Cw <- CLD.est.mats[names(CLD.est.mats)[grepl("^(Lw|Dw)((?!total).)*$",names(CLD.est.mats),perl=TRUE)]]
     names(Cw) <- gsub("^([LD])(w)(.*)","Cw.\\1\\3",names(Cw))
     C_ts_cv <- t.series[paste(yb),grepl("^cv.[DL]",names(t.series))] # cvs associated with components of the catch (removals) during the base years
-    Z <- rdat$Z.age[paste(yb),]
-    N <- rdat$N.age[paste(yb),]
-    Nmdyr <- rdat$N.age.mdyr[paste(yb),]
+    Z <- Z.age[paste(yb),]
+    N <- N.age[paste(yb),]
+    Nmdyr <- N.age.mdyr[paste(yb),]
     logRdev <- rdat$t.series[paste(yb),"logR.dev"]
     if("SSB"%in%names(t.series)){
     S <- t.series[paste(yb),"SSB"]
     }else{
-      warning("SSB not found in t.series. I'm not sure what to use to characterize stock size.")
+      warning("SSB not found in t.series. run_proj is not sure what to use to characterize stock size.")
     }
     R <- N[,1] # Recruits
     # Like F_fleet in bam tpl (e.g. F_cHL). Same computation as bam
@@ -272,7 +281,7 @@ if(!is.null(run_bam_args)){
       if(!is.null(sel_age_1$sel.v.wgted.D)){
         sel_D <- sel_age_1$sel.v.wgted.D
       }else{
-        message("sel_age_1$sel.v.wgted.D not found. Assessment may not model discards?\n")
+        message("sel_age_1$sel.v.wgted.D not found. Assessment may not model discards.\n")
       }
     }
 
@@ -361,7 +370,7 @@ if(!is.null(run_bam_args)){
     ## Weights of fish (year, age) by fleet.
     if(is.null(wgt_F_flt_klb)){
       # initialize
-      wgt_F_flt_klb <- rdat$size.age.fishery[grepl("^[a-zA_Z]*.*wgt",names(rdat$size.age.fishery))]
+      wgt_F_flt_klb <- size.age.fishery[grepl("^[a-zA_Z]*.*wgt",names(size.age.fishery))]
 
       nm_unit_wgt <- c("lb","klb")
       wgt_F_flt_klb_type <- gsub(".*\\<([a-zA-Z]*wgt[a-zA-Z]*)\\>.*","\\1",names(wgt_F_flt_klb))
@@ -402,7 +411,7 @@ if(!is.null(run_bam_args)){
 
     # Lengths of fish (year, age) by fleet.
     if(is.null(len_F_flt_mm)){
-      len_F_flt_mm <- rdat$size.age.fishery[grepl("^[a-zA_Z]*.*len",names(rdat$size.age.fishery))]
+      len_F_flt_mm <- size.age.fishery[grepl("^[a-zA_Z]*.*len",names(size.age.fishery))]
       nm_unit_len <- c("mm")
       len_F_flt_mm_type <- gsub(".*\\<([a-zA-Z]*len[a-zA-Z]*)\\>.*","\\1",names(len_F_flt_mm))
       len_F_flt_mm_units <- gsub(paste0(".*\\<([:alpha:]*",paste(nm_unit_len,collapse = "|"),"[:alpha:]*)\\>.*"),
@@ -427,15 +436,15 @@ if(!is.null(run_bam_args)){
     }
 
 
-    # Recompute landings by fleet to compare with calculations used in projections
-    Cn2 <- lapply(Cn,function(x){x*NA})
-    Cw2 <- lapply(Cw,function(x){x*NA})
-    for(i in 1:length(yb)){
-    for(j in 1:ncol(Fsum_flt)){
-      Cn2[[j]][i,] <- L_calc(F_flt[[j]][i,], Z[i,], N[i,])
-      Cw2[[j]][i,] <- L_calc(F_flt[[j]][i,], Z[i,], N[i,], wgt_F_flt_klb[[j]][i])
-    }
-    }
+    # # Recompute landings by fleet to compare with calculations used in projections
+    # Cn2 <- lapply(Cn,function(x){x*NA})
+    # Cw2 <- lapply(Cw,function(x){x*NA})
+    # for(i in 1:length(yb)){
+    # for(j in 1:ncol(Fsum_flt)){
+    #   Cn2[[j]][i,] <- L_calc(F_flt[[j]][i,], Z[i,], N[i,])
+    #   Cw2[[j]][i,] <- L_calc(F_flt[[j]][i,], Z[i,], N[i,], wgt_F_flt_klb[[j]][i])
+    # }
+    # }
 
     # CPUE
     #   From bam tpl for SEDAR53:
@@ -612,7 +621,7 @@ if(!is.null(run_bam_args)){
 
     ## age compositions from the base years
     # observed
-    acomp_b_ob <- rdat$comp.mats[grepl("^acomp.*.ob$",names(rdat$comp.mats))]
+    acomp_b_ob <- comp.mats[grepl("^acomp.*.ob$",names(comp.mats))]
     names(acomp_b_ob) <- local({
       a <- gsub("^(acomp.)(.*)(.ob)$","\\2",names(acomp_b_ob))
       b <- gsub("(.*)(.D)$","D.\\1",a) # Convert .D suffix to D. prefix
@@ -620,7 +629,7 @@ if(!is.null(run_bam_args)){
       c
     })
     # predicted
-    acomp_b_pr <- rdat$comp.mats[grepl("^acomp.*.pr$",names(rdat$comp.mats))]
+    acomp_b_pr <- comp.mats[grepl("^acomp.*.pr$",names(comp.mats))]
     names(acomp_b_pr) <- local({
       a <- gsub("^(acomp.)(.*)(.pr)$","\\2",names(acomp_b_pr))
       b <- gsub("(.*)(.D)$","D.\\1",a) # Convert .D suffix to D. prefix
@@ -630,7 +639,7 @@ if(!is.null(run_bam_args)){
 
     ## length compositions from the base years
     # observed
-    lcomp_b_ob <- rdat$comp.mats[grepl("^lcomp.*.ob$",names(rdat$comp.mats))]
+    lcomp_b_ob <- comp.mats[grepl("^lcomp.*.ob$",names(comp.mats))]
     names(lcomp_b_ob) <- local({
       a <- gsub("^(lcomp.)(.*)(.ob)$","\\2",names(lcomp_b_ob))
       b <- gsub("(.*)(\\.D)$","D.\\1",a) # Convert .D suffix to D. prefix
@@ -639,7 +648,7 @@ if(!is.null(run_bam_args)){
       d
     })
     # predicted
-    lcomp_b_pr <- rdat$comp.mats[grepl("^lcomp.*.pr$",names(rdat$comp.mats))]
+    lcomp_b_pr <- comp.mats[grepl("^lcomp.*.pr$",names(comp.mats))]
     names(lcomp_b_pr) <- local({
       a <- gsub("^(lcomp.)(.*)(.pr)$","\\2",names(lcomp_b_pr))
       b <- gsub("(.*)(\\.D)$","D.\\1",a) # Convert .D suffix to D. prefix
@@ -759,17 +768,17 @@ if(!is.null(run_bam_args)){
 
     #Initial conditions
     #Recruits in yr 1 constrained to S-R curve, or else varies in stochastic runs
-    if(is.null(N_styr_proj)){N_styr_proj <- tail(rdat$N.age,1)}
-    N_endyr <- rdat$N.age[paste(endyr),]
+    if(is.null(N_styr_proj)){N_styr_proj <- tail(N.age,1)}
+    N_endyr <- N.age[paste(endyr),]
     if(is.null(S_styr_proj)){
       S_styr_proj <- local({
-        Z_styr_proj <- rdat$Z.age[paste(endyr),]
+        Z_styr_proj <- Z.age[paste(endyr),]
         N_endyr_spn <- N_endyr*exp(-1.0*Z_styr_proj*spawn_time)
         sum(N_endyr_spn*reprod)
       })
     }
 
-    ## SR stuff. Kind of long but used to accomodate varying naming conventions.
+    ## SR stuff. Kind of long but used to accommodate varying naming conventions.
     # Note NK 2023-10-15: I think that biascorr and R.autocorr should be available
     # in all models, but maybe with a different name.
 
@@ -883,7 +892,9 @@ if(!is.null(run_bam_args)){
   # } # end if(!is.null(rdat))
 
 
-  ###### Setup projections ######
+  ##############################################################################
+  ###### Setup projections #####################################################
+  ##############################################################################
     if(nyp>0){ # Only run this if there is actually a projection
   ## Build empty objects
   # generic empty objects
@@ -989,7 +1000,6 @@ if(!is.null(run_bam_args)){
     a
   })
 
-
   ## sel during projection years (by py, age, fleet)
   # for any source of F (landings or discards)
   # Fill with weighted selectivity from last year of base (endyr)
@@ -1057,7 +1067,9 @@ if(!is.null(run_bam_args)){
     matrix(a,nrow=nyp,ncol=length(a),dimnames=list(year=paste(yp),fleet=names(a)),byrow=TRUE)
   })
 
-  #### Projection loop
+  ##############################################################################
+  #### Projection loop #########################################################
+  ##############################################################################
   ### years 1 to nyp-1 (i.e. not the last year)
   if(nyp>1){
     for (i in 1:nyp) {
@@ -1252,7 +1264,7 @@ if(!is.null(run_bam_args)){
     }else if(nm_i%in%names(NU_p)){
       n_i <- NU_p[[nm_i]][yrs_acomp_p_i,,drop=FALSE] # If not, see if it's associated with an index (e.g. fishery independent) and use numbers associated with the index
     }else if(nm_i%in%names(Nmisc_p)){
-      n_i <- Nmisc_p[[nm_i]][yrs_acomp_p_i,,drop=FALSE] # If not, the should be an N-at-age matrix in Nmisc that matches
+      n_i <- Nmisc_p[[nm_i]][yrs_acomp_p_i,,drop=FALSE] # If not, there should be an N-at-age matrix in Nmisc that matches
     }else{
       warning(paste0(nm_i, " from acomp_p doesn't appear to match any sources of F, indices, or other data sources associated with a selectivity."))
     }
@@ -1413,6 +1425,64 @@ if(!is.null(run_bam_args)){
     Cn.D.tot <- setNames(rep(NA,nybp),paste(ybp))
     Cw.D.tot <- setNames(rep(NA,nybp),paste(ybp))
   }
+
+
+################################################################################
+### Build projection output ####################################################
+################################################################################
+out_proj <- list(
+  results = list(
+    t_series=cbind(data.frame(years=ybp,
+                              # Fsum=Fsum,
+                              Ffull=Ffull,
+                              L_wgt=Cw.L.tot,
+                              L_num=Cn.L.tot,
+                              D_wgt=Cw.D.tot,
+                              D_num=Cn.D.tot,
+                              N=Nsum,
+                              S=S,
+                              B=Bsum,
+                              R=R,
+                              Rlogdev=logRdev
+    ),
+    U),
+    Nage = N,
+    Uage = U_a,
+    Cn=Cn,
+    Cw=Cw,
+    Cn.L=Cn.L,
+    Cw.L=Cw.L,
+    Cn.D=Cn.D,
+    Cw.D=Cw.D
+  ),
+  results_p = list(
+    t_series=cbind(data.frame(years_p=yp,
+                              # Fsum=Fsum_p,
+                              Ffull=Ffull_p,
+                              L_wgt=Lw_p,
+                              L_num=Ln_p,
+                              D_wgt=Dw_p,
+                              D_num=Dn_p,
+                              S=S_p,
+                              B=B_p,
+                              R=R_p,
+                              Rlogdev=logRdev_p
+    ),
+    U_p),
+    Nage = N_p,
+    Uage = U_a_p
+  ),
+  parms_bam = parms#,
+  # Fage=Fage,
+  # Fage_p=Fage_p,
+  # Fage=Fage,
+  # Fage_p=Ffull_p,
+  # F_flt=F_flt,
+  # F_flt_p=F_flt_p,
+  # Fage_p=Fage_p,
+  # bam_p = bam_p
+)
+
 
 #############################################################
 ###### Extend data inputs and build projected dat file ######
@@ -1797,7 +1867,11 @@ if(!is.null(run_bam_args)){
     bam_p <- NULL
   } # end if(!is.null(bam2r_args))
 
-  # plot stuff
+  out_proj$bam_p <- bam_p
+
+##############################################################
+### plot stuff ###############################################
+##############################################################
   if(plot){
   par(mfrow=c(2,2),mar=c(3,3,1,1),mgp=c(1,0.2,0),tck=-0.01)
   # N
@@ -1858,60 +1932,12 @@ if(!is.null(run_bam_args)){
     text(x=endyr,y=par("usr")[4]*0.9,labels = "endyr",srt=90,pos=1)
   }
 
-  # Return results
+
+##############################################################
+### Return results ###########################################
+##############################################################
   dimnames(U)[[2]]   <- paste0("U_", dimnames(U)[[2]])
   dimnames(U_p)[[2]] <- paste0("U_", dimnames(U_p)[[2]])
-  invisible(list(
-    results = list(
-      t_series=cbind(data.frame(years=ybp,
-                          # Fsum=Fsum,
-                          Ffull=Ffull,
-                          L_wgt=Cw.L.tot,
-                          L_num=Cn.L.tot,
-                          D_wgt=Cw.D.tot,
-                          D_num=Cn.D.tot,
-                          N=Nsum,
-                          S=S,
-                          B=Bsum,
-                          R=R,
-                          Rlogdev=logRdev
-                          ),
-                     U),
-      Nage = N,
-      Uage = U_a,
-      Cn=Cn,
-      Cw=Cw,
-      Cn.L=Cn.L,
-      Cw.L=Cw.L,
-      Cn.D=Cn.D,
-      Cw.D=Cw.D
-    ),
-    results_p = list(
-      t_series=cbind(data.frame(years_p=yp,
-                                # Fsum=Fsum_p,
-                                Ffull=Ffull_p,
-                                L_wgt=Lw_p,
-                                L_num=Ln_p,
-                                D_wgt=Dw_p,
-                                D_num=Dn_p,
-                                S=S_p,
-                                B=B_p,
-                                R=R_p,
-                                Rlogdev=logRdev_p
-      ),
-      U_p),
-      Nage = N_p,
-      Uage = U_a_p
-    ),
-    parms_bam = parms,
-    # Fage=Fage,
-    # Fage_p=Fage_p,
-    # Fage=Fage,
-    # Fage_p=Ffull_p,
-    # F_flt=F_flt,
-    # F_flt_p=F_flt_p,
-    # Fage_p=Fage_p,
-    bam_p = bam_p
-  )
-  )
+
+  invisible(out_proj)
 }

@@ -29,7 +29,7 @@ For example, "bam" is the \code{nm_model} in "1-bam.rdat". This optional argumen
 are .rdat files in \code{dir_bam_sim} other than the MCBE output files. Otherwise, this function
 will try to read all .rdat files.}
 
-\item{obj_collect}{Names of objects in MCBE rdat files to collect and summarize}
+\item{obj_collect}{Names of objects in MCBE rdat files to collect and summarize. Possible values include "info","parms","like","spr.brps","mse", "a.series","t.series","parm.cons", "N.age", "N.age.mdyr", "N.age.spawn","Z.age", and "sel.age"}
 
 \item{obj_labels}{list of names for each value of each parameter in parm.cons}
 

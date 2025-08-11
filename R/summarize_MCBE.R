@@ -7,7 +7,7 @@
 #' For example, "bam" is the \code{nm_model} in "1-bam.rdat". This optional argument should be specified if there
 #' are .rdat files in \code{dir_bam_sim} other than the MCBE output files. Otherwise, this function
 #' will try to read all .rdat files.
-#' @param obj_collect Names of objects in MCBE rdat files to collect and summarize
+#' @param obj_collect Names of objects in MCBE rdat files to collect and summarize. Possible values include "info","parms","like","spr.brps","mse", "a.series","t.series","parm.cons", "N.age", "N.age.mdyr", "N.age.spawn","Z.age", and "sel.age"
 #' @param obj_labels list of names for each value of each parameter in parm.cons
 #' @param nm_Fref Name of F alternative F reference point to use for calculating Fref.65, Fref.75, and Fref.85. There is surely a better way to do those calculations, but this is the current method.
 #' @param ncores number of cores to use for parallel processing
@@ -28,7 +28,8 @@
 
 
 
-summarize_MCBE <- function(dir_bam_sim="sim",
+summarize_MCBE <-
+  function(dir_bam_sim="sim",
                            dir_bam_base="base",
                            fileName="bam",
                            nm_model="",
@@ -351,47 +352,121 @@ out.t.series <- L.sim.t.series
 
 if("N.age"%in%obj_collect){
 # N.age
-N.age.dn1 <- dimnames(rdat$N.age)[[1]]
-N.age.dn2 <- dimnames(rdat$N.age)[[2]]
+N.age.dn1 <- dimnames(rdat$N.age)[[1]] # ages
+N.age.dn2 <- dimnames(rdat$N.age)[[2]] # years
 N.age.vec <- setNames(rep(NA,length(N.age.dn1)),N.age.dn1)
-L.sim.N.age <- foreach::foreach(i=seq_along(N.age.dn2),
+N.year.vec <- setNames(rep(NA,length(N.age.dn2)),N.age.dn2)
+
+L.sim.N.age <- foreach::foreach(i=seq_along(N.age.dn1),
                           .multicombine=TRUE
 ) %dopar% {
   a <- lapply(simSummary,FUN=function(x){
-    year_sim <- dimnames(x[["N.age"]])[[1]]
-    out <- N.age.vec
-    out[year_sim] <- x[["N.age"]][,N.age.dn2[i]]
+    age_sim <- dimnames(x[["N.age"]])[[2]]
+    out <- N.year.vec
+    out[age_sim] <- x[["N.age"]][N.age.dn1[i],]
     out
     })
   b <- do.call(rbind.data.frame,a)
-  dimnames(b) <- list(names(simSummary),N.age.dn1)
+  dimnames(b) <- list(names(simSummary),N.age.dn2)
   return(b)
 }
-names(L.sim.N.age) <- N.age.dn2
+names(L.sim.N.age) <- N.age.dn1
 out.N.age <- L.sim.N.age
 }
 
-if("Z.age"%in%obj_collect){
-  # Z.age
-  Z.age.dn1 <- dimnames(rdat$Z.age)[[1]]
-  Z.age.dn2 <- dimnames(rdat$Z.age)[[2]]
-  Z.age.vec <- setNames(rep(NA,length(Z.age.dn1)),Z.age.dn1)
-  L.sim.Z.age <- foreach::foreach(i=seq_along(Z.age.dn2),
+if("N.age.spawn"%in%obj_collect){
+  # N.age.spawn
+  N.age.spawn.dn1 <- dimnames(rdat$N.age.spawn)[[1]] # ages
+  N.age.spawn.dn2 <- dimnames(rdat$N.age.spawn)[[2]] # years
+  N.age.spawn.vec <- setNames(rep(NA,length(N.age.spawn.dn1)),N.age.spawn.dn1)
+  N.year.vec <- setNames(rep(NA,length(N.age.spawn.dn2)),N.age.spawn.dn2)
+
+  L.sim.N.age.spawn <- foreach::foreach(i=seq_along(N.age.spawn.dn1),
                                   .multicombine=TRUE
   ) %dopar% {
     a <- lapply(simSummary,FUN=function(x){
-      year_sim <- dimnames(x[["Z.age"]])[[1]]
-      out <- Z.age.vec
-      out[year_sim] <- x[["Z.age"]][,Z.age.dn2[i]]
+      age_sim <- dimnames(x[["N.age.spawn"]])[[2]]
+      out <- N.year.vec
+      out[age_sim] <- x[["N.age.spawn"]][N.age.spawn.dn1[i],]
       out
     })
     b <- do.call(rbind.data.frame,a)
-    dimnames(b) <- list(names(simSummary),Z.age.dn1)
+    dimnames(b) <- list(names(simSummary),N.age.spawn.dn2)
     return(b)
   }
-  names(L.sim.Z.age) <- Z.age.dn2
+  names(L.sim.N.age.spawn) <- N.age.spawn.dn1
+  out.N.age.spawn <- L.sim.N.age.spawn
+}
+
+if("N.age.mdyr"%in%obj_collect){
+  # N.age.mdyr
+  N.age.mdyr.dn1 <- dimnames(rdat$N.age.mdyr)[[1]] # ages
+  N.age.mdyr.dn2 <- dimnames(rdat$N.age.mdyr)[[2]] # years
+  N.age.mdyr.vec <- setNames(rep(NA,length(N.age.mdyr.dn1)),N.age.mdyr.dn1)
+  N.year.vec <- setNames(rep(NA,length(N.age.mdyr.dn2)),N.age.mdyr.dn2)
+
+  L.sim.N.age.mdyr <- foreach::foreach(i=seq_along(N.age.mdyr.dn1),
+                                        .multicombine=TRUE
+  ) %dopar% {
+    a <- lapply(simSummary,FUN=function(x){
+      age_sim <- dimnames(x[["N.age.mdyr"]])[[2]]
+      out <- N.year.vec
+      out[age_sim] <- x[["N.age.mdyr"]][N.age.mdyr.dn1[i],]
+      out
+    })
+    b <- do.call(rbind.data.frame,a)
+    dimnames(b) <- list(names(simSummary),N.age.mdyr.dn2)
+    return(b)
+  }
+  names(L.sim.N.age.mdyr) <- N.age.mdyr.dn1
+  out.N.age.mdyr <- L.sim.N.age.mdyr
+}
+# if("Z.age"%in%obj_collect){
+#   # Z.age
+#   Z.age.dn1 <- dimnames(rdat$Z.age)[[1]]
+#   Z.age.dn2 <- dimnames(rdat$Z.age)[[2]]
+#   Z.age.vec <- setNames(rep(NA,length(Z.age.dn1)),Z.age.dn1)
+#   L.sim.Z.age <- foreach::foreach(i=seq_along(Z.age.dn2),
+#                                   .multicombine=TRUE
+#   ) %dopar% {
+#     a <- lapply(simSummary,FUN=function(x){
+#       year_sim <- dimnames(x[["Z.age"]])[[1]]
+#       out <- Z.age.vec
+#       out[year_sim] <- x[["Z.age"]][,Z.age.dn2[i]]
+#       out
+#     })
+#     b <- do.call(rbind.data.frame,a)
+#     dimnames(b) <- list(names(simSummary),Z.age.dn1)
+#     return(b)
+#   }
+#   names(L.sim.Z.age) <- Z.age.dn2
+#   out.Z.age <- L.sim.Z.age
+# }
+
+if("Z.age"%in%obj_collect){
+  # Z.age
+  Z.age.dn1 <- dimnames(rdat$Z.age)[[1]] # ages
+  Z.age.dn2 <- dimnames(rdat$Z.age)[[2]] # years
+  Z.age.vec <- setNames(rep(NA,length(Z.age.dn1)),Z.age.dn1)
+  N.year.vec <- setNames(rep(NA,length(Z.age.dn2)),Z.age.dn2)
+
+  L.sim.Z.age <- foreach::foreach(i=seq_along(Z.age.dn1),
+                                  .multicombine=TRUE
+  ) %dopar% {
+    a <- lapply(simSummary,FUN=function(x){
+      age_sim <- dimnames(x[["Z.age"]])[[2]]
+      out <- N.year.vec
+      out[age_sim] <- x[["Z.age"]][Z.age.dn1[i],]
+      out
+    })
+    b <- do.call(rbind.data.frame,a)
+    dimnames(b) <- list(names(simSummary),Z.age.dn2)
+    return(b)
+  }
+  names(L.sim.Z.age) <- Z.age.dn1
   out.Z.age <- L.sim.Z.age
 }
+
 
 if("parm.cons"%in%obj_collect){
   # parm.cons

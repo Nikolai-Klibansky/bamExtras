@@ -79,7 +79,7 @@ get_ref_pts <-  function(
                      wgt_klb_L=NULL,
                      wgt_klb_D=NULL,
                      make_plot=FALSE,
-                     plot_digits=3#,
+                     plot_digits=4#,
                      #plot_rp=list("eq"= c("SPR","R","L_klb","D_klb","SSB","B"),
                      #              "neq"=c("SPR","R","L_klb","D_klb","SSB","B"))
                      ){
@@ -186,7 +186,6 @@ get_ref_pts <-  function(
                                                    L_klb_2a <- L_knum_2a <- D_klb_2a <- D_knum_2a <- rep(NA,nFopt) # per-recruit calcs
    F_2 <- spr_2 <- SPR_2 <- R_2 <- SSB_2 <- B_2 <- L_klb_2 <- L_knum_2 <- D_klb_2 <- D_knum_2 <- rep(NA,nFopt)
   # iter_inc_msy <- maxF/(ni-1) # not needed
-
   # Usually computed by get_weighted_current()
 
 

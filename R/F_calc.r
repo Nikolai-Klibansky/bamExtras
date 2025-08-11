@@ -4,9 +4,9 @@
 #' This code calculates spawning potential ratio (SPR), and then maximum sustainable
 #' yield (MSY) using equilibrium methods incorporating a Beverton-Holt stock-recruit relationship.
 #' Many of the calculations, particularly the MSY calculations, are based on code
-#' in the Beaufort Assessment Model. This function is essentially the same as the
-#' \code{get_msy} function, but is not as specific to BAM.
-#' @param ac age classes. numeric vector
+#' in the Beaufort Assessment Model. This function is similar to the
+#' \code{get_ref_pts} function, but is not as specific to BAM.
+#' @param age age classes. numeric vector
 #' @param h Beverton-Holt steepness parameter
 #' @param R0 Beverton-Holt R0 parameter. Numbers of fish at age-a (often age-0 or age-1).
 #' @param rec_sigma recruitment standard deviation in log space. used to compute lognormal bias correction -- exp(sigma^2/2)
@@ -18,8 +18,11 @@
 #' @param PS Proportion of fish to include in stock calculation, at age (e.g. mature females at age)
 #' @param w weight at age in any units, used to convert numbers-at-age to weight-at-age. Results in weight will be in these units.
 #' @param ep egg production proxy at age (e.g. weight, fecundity)
-#' @param Px reference proportion of unfished spawning potential ratio (e.g. Px=.40)
 #' @param P_st Time of year when spawning occurs, as a proportion.
+#' @param plus_group Passed to bamExtras::exp_decay (Should the function include a plus group? logical)
+#' @param N_ast_ob Numbers of fish at age, at the time of spawning, observed. Allows the user to provide age structure of the population in the reference year (e.g. terminal year) used to compute observed stock size (i.e. numerator in stock status calculations). If values are provided, additional outputs will be computed in output data, with suffix "ob".
+#' @param R_neq Recruitment used to scale non-equilibrium per recruit quantities to compute SPR-based reference points (e.g. stock size at Fi; SSB_40%). An estimate of mean recruitment is often used here.
+#' @param Px reference proportion of unfished spawning potential ratio (e.g. Px=.40)
 #' @param plots logical. Draw plots?
 #' @param plot_digits number of significant digits to show in plot
 #' @keywords bam stock assessment fisheries population dynamics
@@ -29,7 +32,7 @@
 #' rdat <- rdat_VermilionSnapper
 #' pr <- rdat$parms
 #' as <- rdat$a.series
-#' F_calc(ac=as$age, h=pr$BH.steep, R0=pr$R0,rec_sigma=rdat$parms$R.sigma.par, M=as$M,
+#' F_calc(age=as$age, h=pr$BH.steep, R0=pr$R0,rec_sigma=rdat$parms$R.sigma.par, M=as$M,
 #'        sel_L=rdat$sel.age$sel.v.wgted.L, sel_D=rdat$sel.age$sel.v.wgted.D,
 #'        PS=rep(1,length(as$age)), w=as$wholewgt.wgted.L.klb, ep=as$reprod,
 #'        plots=TRUE,P_st=rdat$parms$spawn.time,plot_digits=4)
@@ -38,101 +41,94 @@
 #' rdat <- rdat_RedSnapper
 #' pr <- rdat$parms
 #' as <- rdat$a.series
-#' F_calc(ac=as$age, M=as$M, sel_L=rdat$sel.age$sel.v.wgted.L, sel_D=rdat$sel.age$sel.v.wgted.D,
+#' F_calc(age=as$age, M=as$M, sel_L=rdat$sel.age$sel.v.wgted.L, sel_D=rdat$sel.age$sel.v.wgted.D,
 #'        PS=rep(1,length(as$age)), w=as$wholewgt.wgted.L.klb, ep=as$reprod,
 #'        plots=TRUE,P_st=rdat$parms$spawn.time,plot_digits=4)
 
-F_calc <-  function(ac,
+F_calc <-  function(age,
                     h=NULL,
                     R0=NULL,
                     rec_sigma=0,
                     M,
-                    Fmax=1,
+                    Fmax=3,
                     F_n=101,
                     sel_L,
-                    sel_D,
+                    sel_D=NULL,
                     PS,
                     w,
                     ep,
-                    Px=.40,
                     P_st=0.5,
-                    plots=FALSE,
                     plus_group=TRUE,
+                    N_ast_ob=NULL,
+                    R_neq=NA,
+                    Px=.40,
+                    plots=FALSE,
                     plot_digits=3){
+# Check inputs
+  if(!is.numeric(age)){warning("age must be a numeric vector")}
+  check_vec(M,age,"F_calc")
+  check_vec(sel_L,age,"F_calc")
+  if(is.null(sel_D)){sel_D <- rep(0,length(age))}
+  check_vec(sel_D,age,"F_calc")
+  check_vec(PS,age,"F_calc")
+  check_vec(w,age,"F_calc")
+  check_vec(ep,age,"F_calc")
+  if(is.null(N_ast_ob)){N_ast_ob <- rep(NA,length(age))}
 
 F <- seq(0,Fmax,length=F_n)
-ac_n=length(ac) # Number of age classes
-a_steps <- ac_n/(max(ac)-min(ac)+1)  # Number of age steps per age
+age_n <- length(age) # Number of age classes
 
-spr <- SPR <- R_eq <- S_eq <- B_eq <- Ln_eq <- Lw_eq <- Dn_eq <- Dw_eq <- E_eq <- rep(0,length(F)) # Initialize storage vectors
+# Initialize storage vectors
+spr <- SPR <- rep(0,length(F))
+R_eq <- S_eq <- B_eq <- Ln_eq <- Lw_eq <- Dn_eq <- Dw_eq <- E_eq <- rep(NA,length(F))
 
 is_SRR <- !is.null(h)&!is.null(R0) # Are stock recruit relationship parameters provided?
 if(!is_SRR){
   warning("Either h or R0 is null. Equilibrium calculations will not be computed.")
 }
 
+# data inputs at-age
+
+pdout <- list()
+
 # FOR EACH LEVEL OF F..
 for (fi in 1:F_n) {
-  # NON-EQUILIBRIUM CALCULATIONS
-  # ALL FISH
-  F_L <- F[fi]*sel_L
-  F_D <- F[fi]*sel_D
-  Z <- M+F_L+F_D
-  # Numbers at-age at the beginning of the year
-  N_a <- exp_decay(age=ac,Z=Z,N1=1,plus_group=plus_group)
-  # Numbers at-age at the time of spawning
-  N_ast <- N_a*exp(-Z*P_st)
-  if(plus_group){
-    N_ast[ac_n] <- (N_ast[ac_n-1]*(exp(-(Z[ac_n-1]*(1.0-P_st) + Z[ac_n]*P_st) )))/(1.0-exp(-Z[ac_n]))
-  }
-
-  # Numbers at age in the unfished population (when F=0)
-  if(F[fi]==0){
-    N_a_F0 <- data.frame("age_class"=ac, "N_F0"=N_a)
-  }
-
-  # Number of fish in the spawning stock (e.g. number of mature females) at age, at the time of spawning
-  N_S_ast <- N_ast*PS
-  # Spawners per recruit
-  spr[fi] <- sum(N_S_ast*ep)
-  # Unfished spawning biomass per recruit
-  phi0 <- spr[1]
-  # Spawning potential ratio
-  SPR[fi] <- spr[fi]/spr[1]
-
-  # EQUILIBRIUM CALCULATIONS
-  if(is_SRR){
-    # Incorporate the SRR into the following calculations
-    # Recruitment (equilibrium recruitment based on SSB/R at F, and R_eq)
-    R_eq[fi] <- local({
-      BC<-exp(rec_sigma^2/2.0)              # multiplicative bias correction
-      #R_eq_i <- (R0*(spr[fi]*4*h*BC-phi0*(1-h)))/(spr[fi]*(5*h-1))
-      R_eq_i <- (R0/((5*h-1.0)*spr[fi]))*(BC*4.0*h*spr[fi]-phi0 *(1.0-h))
-      ifelse(R_eq_i<1e-7, 1e-7, R_eq_i)   # I think this just keeps R_eq_i from getting too close to zero.
-    })
-    # Numbers at age
-    N_a_eq   <- R_eq[fi]*N_a
-    N_ast_eq <- R_eq[fi]*N_ast
-    # Number of fish in the spawning stock (e.g. number of mature females) at age
-    N_S_ast_eq <- N_ast_eq*PS
-    # Spawning stock (biomass, eggs, or possible other units)
-    S_eq[fi] <- sum(N_S_ast_eq*ep)
-    # Total biomass
-    B_eq[fi] <- sum(N_a_eq*w)
-    # Landings (numbers) at age (Gabriel et al. 1989; BAM code)
-    L_a_eq <- N_a_eq*(F_L/Z)*(1-exp(-Z/a_steps))
-    Ln_eq[fi] <- sum(L_a_eq) # a.k.a. yield
-    Lw_eq[fi] <- sum(L_a_eq*w) # a.k.a. yield
-    # Discards (numbers) at age
-    D_a_eq <- N_a_eq*(F_D/Z)*(1-exp(-Z/a_steps))
-    Dn_eq[fi] <- sum(D_a_eq)
-    Dw_eq[fi] <- sum(D_a_eq*w)
-    # Exploitation rate (total catch/number of fish)
-    E_eq[fi] <- (Ln_eq[fi]+Dn_eq[fi])/sum(N_a_eq)
-  }
+  Fi <- F[fi]
+  pdouti <- pop_demo(
+    Fi=Fi,
+    age=age,
+    h=h,
+    R0=R0,
+    rec_sigma=rec_sigma,
+    M=M,
+    sel_L=sel_L,
+    sel_D=sel_D,
+    PS=PS,
+    w=w,
+    ep=ep,
+    P_st=P_st,
+    plus_group=plus_group,
+    N_ast_ob=N_ast_ob,
+    R_neq=R_neq
+    )
+  pdout[[fi]] <- pdouti$data_F
 }
 
-  # Reference points
+# data  outputs by F
+data_F <- as.data.frame(do.call(rbind,pdout)) # Combine data_F vectors into a matrix with F_n rows
+
+spr <- data_F$spr
+SPR <- data_F$SPR
+phi0 <- data_F$spr_F0[1]
+
+R_eq <- data_F$R_eq
+S_eq <- data_F$S_eq
+B_eq <- data_F$B_eq
+Lw_eq <- data_F$Lw_eq
+E_eq <- data_F$E_eq
+
+  ### Reference points
+  # SPR-based
     SPR_Px<-Px  # SPR_Px
     #SPR_Px<<-which(abs(SPR-Px)==min(abs(SPR-Px)))  # Index value corresponding to SPR_Px
     # Calculate close approximation of F at SPR_Px, by interpolating between the nearest values
@@ -145,18 +141,18 @@ for (fi in 1:F_n) {
           F_Px <- local({
           y1 <- F[x1_ix]      # F at x1
           y2 <- F[x2_ix]      # F at x2
-          B1 <- (y2-y1)/(x2-x1)            # Slope of the line connecting the adjacent points
-          B0 <- y1-B1*x1                   # Intercept of the line connecting the adjacent points
+          B1 <- (y2-y1)/(x2-x1)         # Slope of the line connecting the adjacent points
+          B0 <- y1-B1*x1                # Intercept of the line connecting the adjacent points
           return(B0+B1*SPR_Px)          # F_Px calculated through linear interpolation
           })
 
 
-    #F_Px <-    F[SPR_Px_ix]    # F at SPR reference value
-    #SPR_Px <-  SPR[SPR_Px_ix]  # SPR at SPR reference value
+  # MSY-based
           if(is_SRR){
             msy <-     max(Lw_eq)          # maximum sustainable yield
             msy_ix <-  which(Lw_eq==msy)   # msy F-index
             Fmsy <-    F[msy_ix]           # fishing rate at msy
+            if(Fmsy==Fmax){warning("Fmsy estimate is at the upper bound (Fmax). Try increasing Fmax.")}
             sprmsy <-  spr[msy_ix]         # spawners per recruit at msy
             SPRmsy <-  sprmsy/phi0         # spawning potential ratio at msy
             Rmsy <-    R_eq[msy_ix]        # equilibrium recruitment at msy
@@ -170,20 +166,75 @@ for (fi in 1:F_n) {
 ref_points <- if(sum(ep)>0){data.frame(F_Px, SPR_Px, msy, Fmsy, sprmsy, SPRmsy, Rmsy, Smsy, Bmsy, Emsy)
            }else{data.frame("F_Px"=NA,"SPR_Px"=SPR_Px,"msy"=NA,"Fmsy"=NA,"sprmsy"=NA,"SPRmsy"=NA,
                             "Rmsy"=NA,"Smsy"=NA,"Bmsy"=NA,"Emsy"=NA)}
-data <- data.frame("F"=F, "spr"=spr, "SPR"=SPR,
-                "R_eq"=R_eq, "S_eq"=S_eq, "B_eq"=B_eq,
-                "Lw_eq"=Lw_eq, "Ln_eq"=Ln_eq,
-                "Dw_eq"=Dw_eq, "Dn_eq"=Dn_eq,
-                "E_eq"=E_eq)
+
+# Get demographic data associated with F-reference values
+pdout_SPR <- pop_demo(
+  Fi=F_Px,
+  age=age,
+  h=h,
+  R0=R0,
+  rec_sigma=rec_sigma,
+  M=M,
+  sel_L=sel_L,
+  sel_D=sel_D,
+  PS=PS,
+  w=w,
+  ep=ep,
+  P_st=P_st,
+  plus_group=plus_group,
+  N_ast_ob=N_ast_ob,
+  R_neq=R_neq
+  )
+data_age_SPR <- pdout_SPR$data_age
+
+data_age_msy <- if(is_SRR){
+  pdout_msy <- pop_demo(
+    Fi=Fmsy,
+    age=age,
+    h=h,
+    R0=R0,
+    rec_sigma=rec_sigma,
+    M=M,
+    sel_L=sel_L,
+    sel_D=sel_D,
+    PS=PS,
+    w=w,
+    ep=ep,
+    P_st=P_st,
+    plus_group=plus_group,
+    N_ast_ob=N_ast_ob,
+    R_neq=R_neq
+  )
+  pdout_msy$data_age
+}else{
+  NA
+}
+
 if(plots){
-  par(mar=c(2,2,2,1),mfrow=c(3,3),mgp=c(1.1,0.1,0),tck=0.01)
-  plotNK <- function(...,rp=NA){
+# # Values by age
+#   par(mar=c(2,2,2,1),mfrow=c(3,3),mgp=c(1.1,0.1,0),tck=0.01)
+# with(dt_age,
+#      {
+#      plot(age,M,type="o",xlab="age",ylab="natural mortality (M)")
+#      plot(age,sel_L,type="o",xlab="age",ylab="selectivity of landings (sel_L)")
+#      plot(age,sel_D,type="o",xlab="age",ylab="selectivity of discards (sel_D)")
+#      plot(age,PS,type="o",xlab="age",ylab="proportion spawning (PS)")
+#      plot(age,w,type="o",xlab="age",ylab="weight (w)")
+#      plot(age,ep,type="o",xlab="age",ylab="egg production proxy (ep)")
+#      }
+#      )
+
+
+# Values by F
+  mfrow <- if(is_SRR){c(3,3)}else{c(2,1)}
+  par(mar=c(2,2,2,1),mfrow=mfrow,mgp=c(1.1,0.1,0),tck=0.01,cex=1)
+  plot_F <- function(...,rp=NA){
     plot(type="l",lwd=2,...)
     if(!is.na(rp)){points(Fmsy,rp,type="p",col="blue",pch=16)}
   }
 
-  plotNK(F,spr,  main="Non-Equilibrium", rp=sprmsy)
-  plotNK(F,SPR,  main="Non-Equilibrium", rp=SPRmsy)
+  plot_F(F,spr,  main="Non-Equilibrium", rp=sprmsy)
+  plot_F(F,SPR,  main="Non-Equilibrium", rp=SPRmsy,ylim=c(0,1))
   usr <- par("usr")
   #text(Fmsy,SPRmsy, labels=bquote(SPR[msy] == .(signif(SPRmsy,plot_digits))),pos=4)
   text(Fmsy,SPRmsy, labels=bquote(list(F[MSY] == .(signif(Fmsy,plot_digits)),SPR[MSY] == .(signif(SPRmsy,plot_digits)))),pos=4)
@@ -191,18 +242,23 @@ if(plots){
   text(F_Px,SPR_Px, labels=bquote(list(F[.(Px)] == .(signif(F_Px,plot_digits)),SPR[.(Px)] == .(signif(SPR_Px,plot_digits)))),pos=4)
   #text(F_Px,usr[3]+diff(usr[3:4])*.05, labels=bquote(F[.(Px)] == .(signif(F_Px,plot_digits))),pos=4)
   if(is_SRR){
-    plotNK(F,Lw_eq, main="Equilibrium",     rp=msy)
+    plot_F(F,Lw_eq, main="Equilibrium",     rp=msy)
     text(Fmsy,msy, labels=bquote(MSY == .(signif(msy,plot_digits))),pos=4)
-    plotNK(F,R_eq, main="Equilibrium",     rp=Rmsy)
+    plot_F(F,R_eq, main="Equilibrium",     rp=Rmsy)
     text(Fmsy,Rmsy, labels=bquote(R[MSY] == .(signif(Rmsy,plot_digits))),pos=4)
-    plotNK(F,S_eq, main="Equilibrium",     rp=Smsy)
+    plot_F(F,S_eq, main="Equilibrium",     rp=Smsy)
     text(Fmsy,Smsy, labels=bquote(S[MSY] == .(signif(Smsy,plot_digits))),pos=4)
-    plotNK(F,B_eq, main="Equilibrium",     rp=Bmsy)
+    plot_F(F,B_eq, main="Equilibrium",     rp=Bmsy)
     text(Fmsy,Bmsy, labels=bquote(B[MSY] == .(signif(Bmsy,plot_digits))),pos=4)
-    plotNK(F,E_eq, main="Equilibrium",     rp=Emsy)
+    plot_F(F,E_eq, main="Equilibrium",     rp=Emsy)
     text(Fmsy,Emsy, labels=bquote(E[MSY] == .(signif(Emsy,plot_digits))),pos=4)
   }
 }
 
-invisible(list("N_a_F0"=N_a_F0, "RefPts"=ref_points, "Data"=data))
+## 2025-06-20 Updating this function dependent on pop_demo function. Need to tweak pop_demo and add it to bamExtras.
+## Also need to output dt_age associated with Fmsy and F_Px, and program some relevant plots associated
+## with those dt_age data frames.
+invisible(list(
+               "RefPts"=ref_points, "data_F"=data_F, "data_age_SPR"=data_age_SPR, "data_age_msy"=data_age_msy
+               ))
 }

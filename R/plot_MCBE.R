@@ -73,7 +73,7 @@ if("spr.brps"%in%names(ss)){
 }
 nm_parms <- names(parms)
 
-parm.cons <- ss$parm.cons
+# parm.cons <- ss$parm.cons
 a.series <- ss$a.series
 
 styr <- unique(parms$styr)
@@ -242,7 +242,7 @@ if(nsim>1){
 
     # Filter some objects
     parms.2 <- parms[simID2,]
-    parm.cons.2 <-lapply(parm.cons,function(xi){xi[simID2,]})
+    # parm.cons.2 <-lapply(parm.cons,function(xi){xi[simID2,]})
     a.series.2 <- lapply(a.series,function(xi){xi[simID2,]})
     t.series.2 <- lapply(t.series,function(xi){xi[simID2,]})
 
@@ -310,7 +310,7 @@ if(nsim>1){
     }
         if(plot2pdf){dev.off()}
 
-  #   # Natural mortality
+    # Natural mortality
     if(plot2pdf){pdf(file.path(dir_figs,"Fig-MCBE-naturalMortality.ob.pdf"),width=sc_pdf$w*7,height=sc_pdf$h*7)}
     par(mfrow=c(2,1),mar=c(3,5,0.5,0.5),mgp=c(1.5,.3,0),cex.axis=1.5,cex.lab=1.5,tck=0.02)
     if("M.constant"%in%names(parms.2)&nsim>1){

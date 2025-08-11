@@ -20,7 +20,7 @@ sr_eq(SR_switch = "beverton_holt", steep, R0, BiasCor, spr_F0, spr_F)
 \item{spr_F}{spawners per recruit at F}
 }
 \description{
-Spawner-recruit equilibrium function (Beverton-Holt or Ricker). Used inside the get_msy function.
+Spawner-recruit equilibrium function (Beverton-Holt or Ricker). Used inside the get_ref_pts function.
 This is code from the Beaufort Assessment Model converted from ADMB to R.
 }
 \examples{

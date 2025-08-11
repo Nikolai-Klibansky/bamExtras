@@ -1,6 +1,6 @@
 #' sr_eq
 #'
-#' Spawner-recruit equilibrium function (Beverton-Holt or Ricker). Used inside the get_msy function.
+#' Spawner-recruit equilibrium function (Beverton-Holt or Ricker). Used inside the get_ref_pts function.
 #' This is code from the Beaufort Assessment Model converted from ADMB to R.
 #' @param steep Beverton-Holt steepness parameter. numeric vector
 #' @param R0 Beverton-Holt R0 parameter (virgin recruitment). Numbers of fish at first age (often age-0 or age-1). numeric vector
@@ -19,9 +19,9 @@
 sr_eq <- function(SR_switch="beverton_holt", steep, R0, BiasCor, spr_F0, spr_F){
   switch(SR_switch,
          # Beverton-Holt
-         beverton_holt = (R0/((5.0*steep-1.0)*spr_F))*(BiasCor*4.0*steep*spr_F-spr_F0*(1.0-steep)),    
+         beverton_holt = (R0/((5.0*steep-1.0)*spr_F))*(BiasCor*4.0*steep*spr_F-spr_F0*(1.0-steep)),
          # Ricker
-         ricker = R0/(spr_F/spr_F0)*(1.0+log(BiasCor*spr_F/spr_F0)/steep),      
+         ricker = R0/(spr_F/spr_F0)*(1.0+log(BiasCor*spr_F/spr_F0)/steep),
          # None
          none = BiasCor*R0
   )
