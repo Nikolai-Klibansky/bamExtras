@@ -12,7 +12,8 @@
 #' \dontrun{
 #' exp_decay(age=1:10,Z=0.2,N1=100)
 #' exp_decay(age=1:10,Z=0.2,N1=100,plus_group = TRUE)
-#' exp_decay(age=c(2,5,10),Z=0.2,N1=100,plus_group = TRUE)
+#' # The age vector in this example triggers a warning, but in this case it's actually okay.
+#' exp_decay(age=c(1,5,10),Z=0.2,N1=100,plus_group = TRUE)
 #' }
 exp_decay <- function(age,Z,N1=1,plus_group=FALSE){
   if(length(unique(signif(diff(age),2)))>1){
@@ -23,7 +24,7 @@ exp_decay <- function(age,Z,N1=1,plus_group=FALSE){
   ac_n <- length(ac)
   N_a <-  setNames(rep(0,ac_n),age)    # Numbers at age
   if(length(Z)==1){
-    Z <- Z*diff(age) # Z scaled by difference between subsequent age
+    Z <- c(Z*diff(age),Z) # Z scaled by difference between subsequent age
   }
   a_steps <-  ac_n/(max(ac)-min(ac)+1) # Number of age steps per age class
   # Numbers at age (based on Gabriel et al. 1989)
