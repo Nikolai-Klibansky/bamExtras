@@ -12,7 +12,7 @@
 #' @param tpl_obj tpl file read in as a character vector with readLines(con=tpl_file)
 #' @param cxx_obj cxx file read in as a character vector with readLines(con=cxx_file)
 #' @param rdat (list) object read in with dget(). Specifically, the BAM output file produced by the cxx file.
-#' @param run_proj_args List of arguments to pass to \code{run_proj}
+#' @param args_run_proj List of arguments to pass to \code{run_proj}
 #' @param nyps Total number of years to project which may include multiple assessment cycles. nyps = Number of Years to Project in Sequence
 #' @param plot_type Indicate which bam results should be plotted by calling \code{plot_bam}. Current options
 #' include "all", "final", or "none", to plot results from all stock assessments in the projection
@@ -37,7 +37,8 @@ run_proj_seq <- function(CommonName = NULL,
                          tpl_obj = NULL,
                          cxx_obj = NULL,
                          rdat_obj = NULL,
-                         run_proj_args = list(),
+                         args_run_proj = list(),
+                         args_run_MCBE=list(run_mc=FALSE,sim_type_return = "dat"),
                          nyps = NULL,
                          plot_type="final",
                          write_bam_files = "final",
@@ -50,12 +51,23 @@ run_proj_seq <- function(CommonName = NULL,
   wdt <- getwd()
   message(paste("working directory:",wdt))
 
+  args_run_proj_default <- as.list(formals(run_proj))
 
-  if(!"nyp"%in%names(run_proj_args)){
-    nyp <- formals(run_proj)$nyp
-  }else{
-    nyp <- run_proj_args$nyp
-  }
+  args_run_proj <- modifyList(args_run_proj_default,args_run_proj)
+
+  args_run_MCBE_default <- modifyList(as.list(formals(run_MCBE)),
+                                      list(run_est=FALSE,run_bam_base = FALSE,nsim=1
+                                      )
+                                      )
+  args_run_MCBE <- modifyList(args_run_MCBE_default,args_run_MCBE)
+
+
+  nyp <- args_run_proj$nyp
+  # if(!"nyp"%in%names(args_run_proj)){
+  #   nyp <- formals(run_proj)$nyp
+  # }else{
+  #   nyp <- args_run_proj$nyp
+  # }
   if(is.null(nyps)){
     n_cyc <- 2 # Number of projection cycles default to 2
     nyps <- nyp*n_cyc # get default length of projections
@@ -185,12 +197,59 @@ run_proj_seq <- function(CommonName = NULL,
     unlink_dir_bam_update <- ifelse(write_bam_files=="none"|(write_bam_files=="final"&j<n_cyc),TRUE,FALSE)
   }
 
-  bam_proj <- do.call(run_proj,c(run_proj_args,list(rdat = rdat,
-                       bam2r_args = list(dat_obj=dat,tpl_obj=tpl,cxx_obj=cxx),
-                       #nyp = nyp,
-                       plot=draw_plot)))
+  # get unprojected bam
+  bam <- do.call(bam2r,list(dat_obj=dat,tpl_obj=tpl,cxx_obj=cxx))
+  init <- bam$init
+  styr_bam <- init$styr
+  endyr_bam <- init$endyr
+  yr_bam <- styr_bam:endyr_bam
+
+  # project BAM
+  args_run_proj$rdat <- rdat
+  args_run_proj <- modifyList(args_run_proj,
+                              list(args_bam2r = list(dat_obj=dat,tpl_obj=tpl,cxx_obj=cxx),
+                                   plot=draw_plot)
+                              )
+
+
+  bam_proj <- do.call(run_proj,args_run_proj)
   message(paste("run_proj ran successfully to",endyr_proj))
-  bam_update <- run_bam(bam=bam_proj$bam_p,dir_bam=dir_proj,unlink_dir_bam = unlink_dir_bam_update,
+
+  # get projected bam
+  bam_p <- bam_proj$bam_p
+  rdat_proj <- bam_proj$rdat_proj
+
+  # Completely replace values in args_run_MCBE (modifyList will try to replace elements of sublists like rdat_base_obj, which can cause errors here)
+  args_run_MCBE$bam <- bam_p
+  args_run_MCBE$rdat_base_obj <- rdat_proj
+
+  # Add observation error to projected bam (NOTE: adds error to all years)
+  dat_sim <- do.call(run_MCBE,args_run_MCBE)[[1]]
+  bam_p <- bam2r(dat_obj = dat_sim,tpl_obj = bam_p$tpl,cxx_obj = bam_p$cxx)
+  init_p <- bam_p$init
+
+  if(j>1){ # After the first assessment cycle, overwrite values of init_p for with values from base years. That is, keep the data from the previous assessment for past years.
+    # landings, discards, indices, and cvs
+    nm_obs_ts <- names(init)[grepl("^obs_L|^obs_cv_L|^obs_released|^obs_cv_D|^obs_cpue|^obs_cv_cpue",names(init))]
+    for(k in seq_along(nm_obs_ts)){
+      nmk <- nm_obs_ts[k]
+      xk <- init[[nmk]]
+      init_p[[nmk]][names(xk)] <- xk
+    }
+
+    # age and length compositions
+    nm_obs_comp <- names(init)[grepl("^obs_agec|^obs_lenc",names(init))]
+    for(k in seq_along(nm_obs_comp)){
+      nmk <- nm_obs_comp[k]
+      xk <- init[[nmk]]
+      init_p[[nmk]][rownames(xk),] <- xk
+    }
+  }
+
+  # add modified init_p back intor bam_p
+  bam_p <- bam2r(dat_obj = bam_p$dat,tpl_obj = bam_p$tpl,cxx_obj = bam_p$cxx, init=init_p)
+
+  bam_update <- run_bam(bam=bam_p,dir_bam=dir_proj,unlink_dir_bam = unlink_dir_bam_update,
                         return_obj=c("dat","tpl","cxx","rdat")
                         )
 
@@ -217,11 +276,27 @@ run_proj_seq <- function(CommonName = NULL,
     dat <-  bam_update$dat
     tpl <-  bam_update$tpl
     cxx <-  bam_update$cxx
-    rdat <- bam_update$rdat
+    rdat <- rdat_proj
+
+  # update catch advice based on estimation model
+    rdat_sim <- bam_update$rdat
+    parms_sim <- rdat_sim$parms
+    ts_sim <- rdat_sim$t.series
+    nyb_rcn <- args_run_proj$nyb_rcn
+    yrs_L_b <- paste((parms_sim$endyr-(nyb_rcn$L-1)):parms_sim$endyr) # years of recent landings (i.e. from the base model)
+    F_cur_sim <- bamExtras::geomean2(ts_sim[yrs_L_b,"F.full"],na.rm=TRUE)
+    F_proj_sim <- parms_sim$Fmsy # NOTE: NEED TO UPDATE TO ACCOMODATE MODELS THAT DON'T USE Fmsy!!!! 2026-01-30 NPK
+
+    args_run_proj$F_cur <- F_cur_sim
+    args_run_proj$F_proj <- F_proj_sim
   } # end for(j in seq_along(n_cyc))
 
-    return(bam_update)
+    return(list("bam_proj"=bam_proj,
+                "bam_update"=bam_update
+                )
+    )
   }##### END FOREACH LOOP ######
+  names(proj_seq_result) <- nm_sim
 
   if(parallel){
     ## parallel shut down
