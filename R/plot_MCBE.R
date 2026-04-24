@@ -4,7 +4,7 @@
 #' @param dir_figs name of directory that will be created to store figures
 #' @param fileName Name of BAM base files in dir_bam_base, not including file extensions.
 #' @param dir_bam_base Name of directory where the bam base model is located relative to the working directory, for adding base model results to plots (optional).
-#' @param filter_info list of ranges used to filter out MCBE results. set to NULL to retain all results.
+#' @param filter_MCBE_args list of arguments passed to \code{bamExtras::filter_MCBR} to filter out MCBE runs that don't meet a set of criteria. If NULL, no runs will be filtered out.
 #' @param tseries_plot_args List of arguments to pass to \code{bamExtras::plot_boot_vec} when plotting time series.
 #' @param aseries_plot_args List of arguments to pass to \code{bamExtras::plot_boot_vec} when plotting age series.
 #' @param base_tseries_args List of arguments to add to plotting functions (e.g. \code{points()}) that add base results to time series plots
@@ -227,9 +227,11 @@ if(nsim>1){
   #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ####       trimRuns       ####
   #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  if(!is.null(filter_MCBE_args)){
     filter_MCBE_res <- do.call(filter_MCBE,c(list(sim_summary = ss), filter_MCBE_args))
     sim_pass <- filter_MCBE_res$sim_pass
     simID2 <- simID[sim_pass]
+  }
 
     if(plot2pdf){pdf(file.path(dir_figs,"gradient.max.density.pdf"),width=sc_pdf$w*7,height=sc_pdf$h*7)}
     par(mfrow=c(1,1))
