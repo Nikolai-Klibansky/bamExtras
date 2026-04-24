@@ -22,7 +22,7 @@ Compute numbers of individuals alive at time in a population experiencing expone
 \dontrun{
 exp_decay(age=1:10,Z=0.2,N1=100)
 exp_decay(age=1:10,Z=0.2,N1=100,plus_group = TRUE)
-exp_decay(age=c(2,5,10),Z=0.2,N1=100,plus_group = TRUE)
+exp_decay(age=c(1,5,10),Z=0.2,N1=100,plus_group = TRUE)
 }
 }
 \author{

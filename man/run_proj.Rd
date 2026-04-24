@@ -6,16 +6,16 @@
 \usage{
 run_proj(
   rdat = NULL,
-  run_bam_args = NULL,
-  bam2r_args = NULL,
+  args_run_bam = NULL,
+  args_bam2r = NULL,
   stochastic = FALSE,
   pstar = NULL,
   styr_proj = NULL,
   nyb_rcn = list(L = 3, U = 3, R = 5, comp = 3),
   nyp_cur = 3,
   nyp = 5,
-  nm_yr_p = c("endyr", "endyr_rec_dev", "endyr_rec_phase2", "endyr_rec_spr", "styr_regs",
-    "endyr_proj"),
+  nm_yr_p = c("endyr", "endyr_dev_rec", "endyr_rec_dev", "endyr_rec_phase2",
+    "endyr_rec_spr", "styr_regs", "endyr_proj"),
   F_cur = NULL,
   F_proj = NULL,
   L_cur = NULL,
@@ -38,8 +38,21 @@ run_proj(
   SR_method = "BH",
   age_error = NULL,
   project_bam = FALSE,
-  ia_args = list(U_nm = NULL),
-  obs_error = list(cv_U_sc = 0),
+  args_ia = list(U_nm = NULL),
+  model_obs = list(cv_L = function(x = 0.2, n = nyp) {
+     rep(x, n)
+ }, cv_D =
+    function(x = 0.2, n = nyp) {
+     rep(x, n)
+ }, cv_U = function(x, n = nyp) {
+    
+    rep(x, n)
+ }, nfish = function(x, n = nyp) {
+     rep(x, n)
+ }, ntrip = function(x, n
+    = nyp) {
+     rep(x, n)
+ }),
   plot = FALSE,
   nm_comp_sfx = c(""),
   t_series_na_vals = c(-9999, -99999, -999999),
@@ -49,9 +62,9 @@ run_proj(
 \arguments{
 \item{rdat}{BAM output rdat (list) object read in with dget().}
 
-\item{run_bam_args}{list of arguments passed internally to run_bam if any are provided}
+\item{args_run_bam}{list of arguments passed internally to run_bam if any are provided}
 
-\item{bam2r_args}{list of arguments passed internally to bam2r if any are provided}
+\item{args_bam2r}{list of arguments passed internally to bam2r if any are provided}
 
 \item{stochastic}{logical. Is this a stochastic projection? Mostly runs the same code
 either way, but stochastic projections add normal errors to recruitment. Stochastic
@@ -76,7 +89,7 @@ last nyb_rcn years of the base model will not be projected forward. named list}
 
 \item{F_proj}{fully selected fishing mortality rate}
 
-\item{L_cur}{current level of landings}
+\item{L_cur}{current level of landings. (2026-01-30 NPK: Not yet implemented in run_proj but will be used to set catch in projections instead of F).}
 
 \item{ages}{ages. numeric vector}
 
@@ -90,7 +103,7 @@ last nyb_rcn years of the base model will not be projected forward. named list}
 
 \item{sel_tot}{selectivity at age to compute Z (includes landings and discards). numeric vector}
 
-\item{sel_F_flt}{list of selectivity vectors (by age) or matrices (by year,age) for each fleet associated with landings or discards. numeric vector or matrix}
+\item{sel_F_flt}{list of selectivity vectors (by age) or matrices (by year,age) for each fleet associated with landings or discards.}
 
 \item{wgt_mt}{weight at age of population in metric tons (mt). numeric vector}
 
@@ -123,9 +136,9 @@ and should be used with caution.}
 
 \item{project_bam}{logical. After the projection is run, should the function build a new set of projected bam files?}
 
-\item{ia_args}{list of arguments to pass to interim adjustment function. See Details section below.}
+\item{args_ia}{list of arguments to pass to interim adjustment function. See Details section below.}
 
-\item{obs_error}{list of optional arguments for incorporating observation error into projections. See Details section below.}
+\item{model_obs}{list of optional arguments for incorporating observation error into simulated sampling when building a dat file when project_bam=TRUE. See Details section below. NOT CURRENTLY USED 2025-09-17.}
 
 \item{plot}{logical. Produce plots of extended base model including projected data}
 
@@ -143,7 +156,7 @@ values to a particular value in parm.cons.}
 Project BAM forward in time to conduct deterministic or stochastic projections.
 }
 \details{
-\code{ia_args}:
+\code{args_ia}:
 \itemize{
 \item{U_nm}{The fleet abbreviation for an index of abundance that you want to use to adjust F (e.g. sTV, sCT). If set to \code{NULL}, no interim adjustment will be used.}
 \item{type}{Method used for computing F adjustment. "Uprop" computes the mean U from recent years, divided by U from
@@ -157,9 +170,14 @@ assessments when interim adjustments will be computed and applied to F. The inte
 \item{include_yrlim}{Logical. Should interim analysis be conducted in the first and last years of the projection period?
 By default, include_yrlim_p = FALSE}
 }
-\code{obs_error}:
+\code{model_obs}:
+Values supplied to model_obs should be provided as a vector of function class objects of length 1 or length equal to the number of fleets associated with the data type. For cv_U, ntrip, and nsamp, these function can use the argument x, where x is the geometric mean of values for a fleet for the nyb_rcn years of the assessment.
 \itemize{
-\item{cv_U_sc}{Number to multiply by cv values of abundance indices in the projection period.}
+\item{cv_L}{Function for computing cvs of landings during projection period.}
+\item{cv_D}{Function for computing cvs of discards during projection period.}
+\item{cv_U}{Function for computing cvs of indices during projection period.}
+\item{ntrip}{Function for computing the number of fish sampled for comps during projection period.}
+\item{nsamp}{Function for computing the number of trips sampled for comps during projection period.}
 }
 }
 \examples{
@@ -168,10 +186,10 @@ By default, include_yrlim_p = FALSE}
 proj_VeSn <- run_proj(rdat_VermilionSnapper,plot=TRUE)
 
 # Run deterministic projection with defaults
-# and project bam inputs, by adding the bam files with bam2r_args
+# and project bam inputs, by adding the bam files with args_bam2r
 proj_VeSn <- run_proj(rdat_VermilionSnapper,
 project_bam=TRUE,
-bam2r_args = list(
+args_bam2r = list(
 dat_obj=dat_VermilionSnapper,
 tpl_obj=tpl_VermilionSnapper,
 cxx_obj=cxx_VermilionSnapper

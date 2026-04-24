@@ -16,7 +16,7 @@ plot_bam(
   BSR.time.plots.args = list(),
   CLD.total.plots.args = list(),
   Cohort.plots.args = list(),
-  Comp.plots.args = list(),
+  Comp.plots.args = list(resid.type = "pearson"),
   Comp.yearly.plots.args = list(print.neff = TRUE, print.n = TRUE),
   Eq.plots.args = list(F.references = list("Fmsy", "F40"), user.Eq = list("L.eq.klb",
     "L.eq.knum", "D.eq.knum")),

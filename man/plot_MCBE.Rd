@@ -32,6 +32,8 @@ plot_MCBE(
 
 \item{dir_bam_base}{Name of directory where the bam base model is located relative to the working directory, for adding base model results to plots (optional).}
 
+\item{filter_MCBE_args}{list of arguments passed to \code{bamExtras::filter_MCBR} to filter out MCBE runs that don't meet a set of criteria. If NULL, no runs will be filtered out.}
+
 \item{tseries_plot_args}{List of arguments to pass to \code{bamExtras::plot_boot_vec} when plotting time series.}
 
 \item{aseries_plot_args}{List of arguments to pass to \code{bamExtras::plot_boot_vec} when plotting age series.}
@@ -46,8 +48,6 @@ plot_MCBE(
 in \code{dir_figs}. If false, figures will be plotted to the active graphic device.}
 
 \item{sc_pdf}{Optional scalars for pdf width and height. Multiplied by defaults pdf width and height. Defaults to 1 which has no effect.}
-
-\item{filter_info}{list of ranges used to filter out MCBE results. set to NULL to retain all results.}
 }
 \description{
 Plot results from MCBE uncertainty analysis

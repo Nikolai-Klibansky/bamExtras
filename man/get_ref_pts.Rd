@@ -30,7 +30,7 @@ get_ref_pts(
   wgt_klb_L = NULL,
   wgt_klb_D = NULL,
   make_plot = FALSE,
-  plot_digits = 3
+  plot_digits = 4
 )
 }
 \arguments{

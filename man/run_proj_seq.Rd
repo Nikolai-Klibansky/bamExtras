@@ -11,7 +11,8 @@ run_proj_seq(
   tpl_obj = NULL,
   cxx_obj = NULL,
   rdat_obj = NULL,
-  run_proj_args = list(),
+  args_run_proj = list(),
+  args_run_MCBE = list(run_mc = FALSE, sim_type_return = "dat"),
   nyps = NULL,
   plot_type = "final",
   write_bam_files = "final",
@@ -30,7 +31,7 @@ run_proj_seq(
 
 \item{cxx_obj}{cxx file read in as a character vector with readLines(con=cxx_file)}
 
-\item{run_proj_args}{List of arguments to pass to \code{run_proj}}
+\item{args_run_proj}{List of arguments to pass to \code{run_proj}}
 
 \item{nyps}{Total number of years to project which may include multiple assessment cycles. nyps = Number of Years to Project in Sequence}
 

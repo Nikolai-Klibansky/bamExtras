@@ -13,11 +13,20 @@ run_MCBE(
   dat_file = NULL,
   tpl_file = NULL,
   cxx_file = NULL,
+  rdat_base_file = NULL,
   dat_obj = NULL,
   tpl_obj = NULL,
   cxx_obj = NULL,
-  data_sim = list(cv_U = NULL, cv_L = NULL, cv_D = NULL),
-  par_default = list(cv_U = 0.2, cv_L = 0.2, cv_D = 0.2),
+  rdat_base_obj = NULL,
+  data_sim = list(cv_U = function(x, a = 1) {
+     x * a
+ }, cv_L = function(x, a = 4) {
+
+        x * a
+ }, cv_D = function(x, a = 4) {
+     x * a
+ }),
+  par_default = list(cv_U = 0.2, cv_L = 0.05, cv_D = 0.05),
   standardize = TRUE,
   nsim = 11,
   sclim = list(),
@@ -45,11 +54,13 @@ run_MCBE(
   overwrite_bam_base = TRUE,
   admb_options_base = "-nox",
   run_est = TRUE,
+  run_mc = TRUE,
+  run_boot = TRUE,
   sim_type_return = "dat",
   admb_options_sim = "-est -nox",
   prompt_me = FALSE,
   subset_rdat = list(eq.series = 101, pr.series = 101, t.series = "styr:endyr"),
-  random_seed = 12345
+  random_seed = NULL
 )
 }
 \arguments{
@@ -69,13 +80,17 @@ run_MCBE(
 
 \item{cxx_file}{cxx file path}
 
-\item{dat_obj}{dat file read in as a character vector with readLines(con=dat_file)}
+\item{rdat_base_file}{rdat_base file path}
 
-\item{tpl_obj}{tpl file read in as a character vector with readLines(con=tpl_file)}
+\item{dat_obj}{dat object. (e.g. file read in as a character vector with readLines(con=dat_file))}
 
-\item{cxx_obj}{cxx file read in as a character vector with readLines(con=cxx_file)}
+\item{tpl_obj}{tpl object. (e.g. file read in as a character vector with readLines(con=tpl_file))}
 
-\item{data_sim}{list for supplying optional data not available in input data or rdat (e.g. cvs for simulating time series of landings, discards, and cpue)}
+\item{cxx_obj}{cxx object. (e.g. file read in as a character vector with readLines(con=cxx_file))}
+
+\item{rdat_base_obj}{rdat_base object. (e.g. file read in as list with dget(file=rdat_base_file))}
+
+\item{data_sim}{list for supplying optional data not available in input data or rdat (e.g. cvs for simulating time series of landings, discards, and cpue). Can be provided either as a function that will be applied internally to cvs used for fitting in BAM and a data frame where rows represent model years (styr:endyr) and columns represent fleets. Column names need to be fleet abbreviations matching the fleet abbreviations used in the tpl (e.g. cHL, rHB)}
 
 \item{par_default}{list for supplying default values for particular parameters to use if values cannot be found by in the usual locations (e.g. if a time series of landings does not have a corresponding time series of cvs, the default cv_L will be used)}
 
@@ -112,7 +127,11 @@ run_MCBE(
 
 \item{run_est}{Do you want to run the estimation model (BAM)? If FALSE, the simulated data will be generated but won't be used in new BAM runs}
 
-\item{sim_type_return}{Type of simulated data to return: "init" or "dat". Has no effect in run_est=TRUE.}
+\item{run_mc}{Logical switch for turning on/off Monte Carlo (MC) draws. If FALSE, the MC process will not run. Note that this includes reproductive inputs, thus it effectively shuts of repro_sim}
+
+\item{run_boot}{Logical switch for turning on/off bootstrapping (resampling) of data. If FALSE, the bootstrapping process will not run.}
+
+\item{sim_type_return}{Type of simulated data to return: "init" or "dat". Has no effect if run_est=TRUE.}
 
 \item{admb_options_sim}{ADMB code snippet used in shell script when running bam}
 
@@ -134,7 +153,7 @@ most notably the executable (\code{exe}) file used in the MCBE process, stored i
 Simulated input data sets are generated for specified fixed parameters and data sets. New BAM data input (\code{dat}) files
 are created and the BAM base executable is rerun with each \code{dat} file, using parallel processing. After each simulation
 is run, \code{run_bam} checks if the objective function value (i.e. total likelihood) for a numeric value; if the value is non numeric
-(e.g. nan), then the run is considered to have failed. The \code{dat} and results (\code{rdat}) files are for successful
+(e.g. nan), then the run is considered to have failed. The \code{dat} and results (\code{rdat}) files for successful
 runs are moved to \code{dir_bam_sim}. If any runs fail (which is not common) a folder is created (named \code{dir_bam_sim}
 with suffix '_fail') and failed runs are moved there. \code{run_bam}
 and results file (\code{rdat}) are copied to \code{dir_bam_sim}.
@@ -198,6 +217,15 @@ run_MCBE("Tilefish", dir_bam_base="Tile_base", dir_bam_sim="Tile_sim")
 run_MCBE("VermilionSnapper", dir_bam_base="VeSn_base", dir_bam_sim="VeSn_sim")
 
 MCBE_ReSn <- run_MCBE("RedSnapper",steep_sclim = c(1,1))
+
+# Add more observation error to landings
+ts <- rdat_GagGrouper$t.series
+cv_L <- ts[,names(ts)[grepl("^cv.L",names(ts))],drop=FALSE]*4
+names(cv_L) <- gsub("^cv.L.","",names(cv_L))
+data_sim <- list(cv_U = NULL, cv_L = cv_L, cv_D = NULL)
+run_MCBE("GagGrouper", dir_bam_base="GaGr_base", dir_bam_sim="GaGr_sim", data_sim=data_sim)
+simsum_GaGr <- summarize_MCBE(dir_bam_sim="GaGr_sim",dir_bam_base = "GaGr_base") # summarize results
+plot_MCBE(sim_summary = simsum_GaGr,filter_MCBE_args = NULL,dir_figs="figs_GaGr") # plot results
 }
 
 }
