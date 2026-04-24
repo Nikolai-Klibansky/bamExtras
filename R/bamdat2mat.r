@@ -327,6 +327,7 @@ bamdat2mat <- function(CommonName=NULL,bam=NULL,
   nm_set_len7 <- nm_set_len7[grepl("^(?!.*dev).*",nm_set_len7,perl=TRUE)] # Remove any dev vectors
   nm_set_yr <- nm_set[grepl("^set_log_dev_vals_(F|rec)",nm_set)] # Set vectors with a year dimension
   nm_set_age <- c("set_log_dev_vals_Nage","set_M") # Set vectors with an age dimension
+  nm_set_age <- nm_set_age[nm_set_age%in%names(init)]
 
   nm_set_len1_Dmort <- sort(nm_set_len1[grepl("^set_Dmort_",nm_set_len1)])
   nm_set_len1_q <- sort(nm_set_len1[grepl("^set_.*q_.*",nm_set_len1)])
@@ -352,8 +353,16 @@ bamdat2mat <- function(CommonName=NULL,bam=NULL,
   colnames(set_len3) <- c("lower","upper","phase")
   colnames(set_len7) <- c("init","lower","upper","phase","prior_mean","prior_var","prior_pdf")
 
-  set_age <- cbind(c(NA,as.numeric(init[["set_log_dev_vals_Nage"]])),as.numeric(init[["set_M"]]))
-  dimnames(set_age) <- list("agebins"=agebins,nm_set_age)
+  # set_age <- cbind(c(NA,as.numeric(init[["set_log_dev_vals_Nage"]])),as.numeric(init[["set_M"]]))
+  # dimnames(set_age) <- list("agebins"=agebins,nm_set_age)
+  set_age <- local({
+    a <- matrix(NA,nrow=length(agebins),ncol=length(nm_set_age),dimnames=list("agebins"=agebins,nm_set_age))
+    a[,"set_log_dev_vals_Nage"] <- c(NA,as.numeric(init[["set_log_dev_vals_Nage"]]))
+    if("set_M"%in%names(init)){
+      a[,"set_M"] <- as.numeric(init[["set_M"]])
+    }
+    a
+  })
 
   # Possible names of life history vectors
   nm_lh_age <- c("obs_maturity_f","obs_maturity_m","obs_prop_f","obs_prop_m","fecpar_batches","set_fecpar_batches",
