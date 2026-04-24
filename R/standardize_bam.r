@@ -19,7 +19,7 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' # Read in and standardize of the current BAM models
+#' # Read in and standardize the current BAM models
 #' bam_AtMe <- standardize_bam("AtlanticMenhaden")
 #' bam_BlSB <- standardize_bam("BlackSeaBass")
 #' bam_BlTi <- standardize_bam("BluelineTilefish")
