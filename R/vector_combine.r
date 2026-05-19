@@ -1,7 +1,6 @@
 #' combine vectors using Conn 2010 hierarchical method
 #'
-#' This function was designed to be used to combine multiple indices of abundance into a single index, but it could
-#' also be used to combine other types of numeric vectors.
+#' @description This is a version of a function that was written by Paul Conn, Kyle Shertzer, and Erik Williams, using jags to combine indices of abundance. Nikolai Klibansky converted that script into this function.
 #' @param x observed vectors as a data frame
 #' @param cv observed cvs associated with x, as a data frame
 #' @param key_nm If a common column, like "year", is provided in x and cv as a key to relate values between data frames
@@ -10,10 +9,14 @@
 #' @param cv.na value to to replace missing cv values with
 #' @param run_mcmcplot Should mcmcplots::mcmcplot be run to plot jags results?
 #' @param mcmcplot_args if run_mcmcplot = TRUE, additional arguements can be passed to mcmcplot
-#' @description This is a version of a function that was written by Paul Conn, Kyle Shertzer, and Erik Williams, using jags to combine indices of abundance. Nikolai Klibansky converted that script into this function.
 #' @references Conn, P. B. 2010. Hierarchical analysis of multiple noisy abundance indices. Canadian Journal of Fisheries and Aquatic Sciences 67:108-120.
 #' @keywords bam stock assessment fisheries Conn method combine indices
-#' @author Nikolai Klibansky, Kyle Shertzer, Erik Williams
+#' @author Nikolai Klibansky, Kyle Shertzer, Erik Williams, Paul Conn
+#' @details
+#' Additional details...
+#'   This function was designed to be used to combine multiple indices of abundance into a single index, but it could also be used to combine other types of numeric vectors.
+#'   Requires JAGS install and mcmcplots package.
+#'
 #' @export
 #' @examples
 #' \dontrun{

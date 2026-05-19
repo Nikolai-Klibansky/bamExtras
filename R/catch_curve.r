@@ -19,11 +19,11 @@
 #' comp <- rdat$comp.mats # List of composition matrices
 #' acomp <- comp[grepl("^acomp.*.ob$",names(comp))] # list of observed age composition matrices
 #'
-#' comp_i <- acomp$acomp.Mcvt.ob
+#' comp_i <- acomp$acomp.sTV.ob
 #' cc_i <- catch_curve(comp_i)
 #'
 #' # Plot comps and add catch curves (note the log-tranformation of the composition data)
-#' comp_plot(log(comp_i),cc=cc_i,fillComp = FALSE,ylab= "log(proportion)",xlab="age",title="black sea bass commercial handline catch curves")
+#' comp_plot(log(comp_i),cc=cc_i,fillComp = FALSE,ylab= "log(proportion)",xlab="age",title="black sea bass chevron trap catch curves")
 #'
 #' # Plot Z estimates over time for multiple sets of age compositions
 #' par(mfrow=c(1,1),mgp=c(1,.2,0),mar=c(2,2,1,1),oma=c(0,0,0,0),tck=0.01)
