@@ -8,8 +8,7 @@ Authors@R:
            email = "nikolai.klibansky@noaa.gov",
            comment = c(ORCID = "0000-0003-2025-5089"))
 Description: This package is a miscellany of functions and data sets used in support of stock assessments using the Beaufort Assessment Model (BAM), and contains the most recent BAM code for 15 fish stocks in the Southeast US Atlantic.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: not subject to copyright
 Encoding: UTF-8
 LazyData: true
 BuildVignettes: true
