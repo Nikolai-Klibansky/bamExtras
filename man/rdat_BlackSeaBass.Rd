@@ -3,18 +3,19 @@
 \docType{data}
 \name{rdat_BlackSeaBass}
 \alias{rdat_BlackSeaBass}
-\title{BAM stock assessment results (rdat file): US Southeast Atlantic Black Sea Bass (SEDAR 76)}
+\title{BAM stock assessment results (rdat file): US Southeast Atlantic Black Sea Bass (SEDAR 76 update modified)}
 \format{
 An object of class \code{"list"}
 }
 \source{
 SEDAR 76 Stock Assessment Report South Atlantic Black Sea Bass
-(\href{https://sedarweb.org/documents/sedar-76-stock-assessment-report-south-atlantic-black-sea-bass/}{PDF})
+(\href{https://sedarweb.org/documents/sedar-76-bsb-update/}{PDF})
 }
 \usage{
 rdat_BlackSeaBass
 }
 \description{
 Data stored in the standard rdat file output by the Beaufort Assessment Model (BAM)
+This version of the black sea bass model is modified from the SEDAR 76 update model although the model and data are largely the same as in the SEDAR 76 update report.
 }
 \keyword{datasets}

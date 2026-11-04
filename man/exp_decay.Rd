@@ -22,6 +22,7 @@ Compute numbers of individuals alive at time in a population experiencing expone
 \dontrun{
 exp_decay(age=1:10,Z=0.2,N1=100)
 exp_decay(age=1:10,Z=0.2,N1=100,plus_group = TRUE)
+# The age vector in this example triggers a warning, but in this case it's actually okay.
 exp_decay(age=c(1,5,10),Z=0.2,N1=100,plus_group = TRUE)
 }
 }

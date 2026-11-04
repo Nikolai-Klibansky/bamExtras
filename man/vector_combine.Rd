@@ -35,8 +35,9 @@ provide the name as key_nm. Should be coercible to a numeric vector. If NULL, th
 This is a version of a function that was written by Paul Conn, Kyle Shertzer, and Erik Williams, using jags to combine indices of abundance. Nikolai Klibansky converted that script into this function.
 }
 \details{
-This function was designed to be used to combine multiple indices of abundance into a single index, but it could
-also be used to combine other types of numeric vectors.
+Additional details...
+This function was designed to be used to combine multiple indices of abundance into a single index, but it could also be used to combine other types of numeric vectors.
+Requires JAGS install and mcmcplots package.
 }
 \examples{
 \dontrun{
@@ -100,7 +101,7 @@ p
 Conn, P. B. 2010. Hierarchical analysis of multiple noisy abundance indices. Canadian Journal of Fisheries and Aquatic Sciences 67:108-120.
 }
 \author{
-Nikolai Klibansky, Kyle Shertzer, Erik Williams
+Nikolai Klibansky, Kyle Shertzer, Erik Williams, Paul Conn
 }
 \keyword{Conn}
 \keyword{assessment}

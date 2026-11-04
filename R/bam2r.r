@@ -15,6 +15,7 @@
 #' to read bam model files into R, but in many cases it should work to read other
 #' dat and tpl files.
 #' @keywords bam stock assessment fisheries
+#' @author Nikolai Klibansky
 #' @export
 #' @examples
 #' \dontrun{

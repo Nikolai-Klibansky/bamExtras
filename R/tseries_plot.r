@@ -21,7 +21,7 @@
 #' tser <- rdat$t.series
 #' U <- tser[,grepl("^U.*ob$",names(tser))]
 #' Ucv <- tser[,grepl("^cv.U.",names(tser))]
-#' tseries_plot(U,Ucv,xlab="year",ylab="index of abundance",plotLabel=rdat$info$species)
+#' tseries_plot(U,Ucv,plotLabel=rdat$info$species,errType = "cv"),matplot_args=list(xlab="year",ylab="index of abundance"))
 #' }
 #'
 
