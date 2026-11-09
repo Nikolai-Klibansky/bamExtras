@@ -94,6 +94,9 @@ points(rdat_RePo2$t.series$year,rdat_RePo2$t.series$SSB.msst,type="o",col="blue"
 legend("topright",legend=c("RePo","RePo2"),pch=1,lty=1,col=c("black","blue"),bty="n")
 }
 }
+\author{
+Nikolai Klibansky
+}
 \keyword{assessment}
 \keyword{bam}
 \keyword{fisheries}

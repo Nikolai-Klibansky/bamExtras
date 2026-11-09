@@ -334,4 +334,3 @@ bam2r <- function(CommonName=NULL,init=NULL,
 
 #' @rdname bam2r
 #' @export
-bam_to_r <- bam2r
