@@ -10,9 +10,11 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' # As of 2026-11-09 only two rdat stored in bamExtras contains \code{lenprob.mats}. All BAM models have these lenprob matrices in the tpl file but they aren't usually passed to the rdat in the cxx file.
-#' plot_lenprob(rdat_GrayTriggerfish)
+#' # Most rdat stored in bamExtras contains \code{lenprob.mats} and many have multiple matrices within the list.
 #' plot_lenprob(rdat_BlackSeaBass)
+#' plot_lenprob(rdat_GagGrouper)
+#' plot_lenprob(rdat_GrayTriggerfish)
+#' plot_lenprob(rdat_VermilionSnapper)
 #' # Change the color palette
 #' plot_lenprob(rdat_GrayTriggerfish,plot_args=list(col=heat.colors))
 #' # I think it's kind of nice to have the color for values near zero to contrast strongly with the rest of the color palette.
@@ -24,11 +26,11 @@ plot_lenprob <- function(spp,
                          par_args=list(),
                          plot_args=list()){
   require(plot.matrix)
-  
+
   par_args_user <- par_args
   par_args_default <- list(mfrow=c(1,1),mar=c(2,2,1.5,3),oma=c(1,1,1,1),mgp=c(1,.2,0),tck=-0.01)
   par_args <- modifyList(par_args_default,par_args_user)
-  
+
   plot_args_user <- plot_args
 
   if("lenprob.mats"%in%names(spp)){
@@ -38,9 +40,9 @@ plot_lenprob <- function(spp,
       #pdf(file.path(df1,"misc",paste0(nm_lpm_i,".pdf")),width = 8,height=6)
       lpm_i <- lpm[[nm_lpm_i]]
       lpm_i <- as.matrix(t(lpm_i[,ncol(lpm_i):1])) # flip and transpose to plot correctly
-      
+
       do.call(par,par_args)
-      
+
       n_col <- 20
       col_lp <- c(rgb(1,1,1),gray(((n_col*.8):1)/n_col))
       plot_args_default <- list(x=lpm_i,
@@ -57,7 +59,7 @@ plot_lenprob <- function(spp,
       #      xlab="age bins",ylab="length bins",main=nm_lpm_i)
       #dev.off()
     }
-    
+
   }else{
     message("lenprob.mats not found in spp")
   }

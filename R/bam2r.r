@@ -331,6 +331,3 @@ bam2r <- function(CommonName=NULL,init=NULL,
 
   return(list("dat"=unlist(dat_list),"tpl"=tpl,"cxx"=cxx,"init"=init,"dat_list"=dat_list))
 }
-
-#' @rdname bam2r
-#' @export

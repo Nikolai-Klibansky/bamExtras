@@ -17,13 +17,13 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' # read in commercial handline age comps used in the recent stock assessment
-#' x <- rdat_BlackSeaBass$comp.mats$acomp.cHL.ob
+#' # read in commercial handline age comps used in the rex.ob <- rdat_BlackSeaBass$comp.mats$acomp.cHL.ob
+#' x.pr <- rdat_BlackSeaBass$comp.mats$acomp.cHL.pr
 #' n <- rdat_BlackSeaBass$t.series[rownames(x),c("acomp.cHL.n","acomp.cHL.nfish")]
 #' # Plot comps by year
-#' comp_plot(x)
+#' comp_plot(data_ob=x.ob,data_pr = x.pr)
 #' # Add sample sizes
-#' comp_plot(x,n1=n[,1],n2=n[,2])
+#' comp_plot(data_ob=x.ob,data_pr = x.pr, n1=n[,1],n2=n[,2])
 #' # Plot comps and add catch curves (note the log-transformation of the composition data)
 #' comp_plot(log(x),cc=catch_curve(x),fillComp = FALSE,ylab= "log(proportion)",xlab="age",title="black sea bass commercial handline catch curves")
 #' }
@@ -34,7 +34,7 @@ comp_plot <- function(data_ob,data_pr=NULL,n1=NULL,n2=NULL,cc=NULL,data_type="pr
                       addGrid=FALSE,byrow=FALSE,
                       cex_n=1.3,
                       cex_year=1.3,
-                      fillComp=TRUE, colFill=rgb(0,0,0,0.5), vlines=NULL,
+                      fillComp=TRUE, colFill=rgb(0,0,0,0.25), vlines=NULL,
                       signif_cc=3,
                       ...){
 
@@ -56,7 +56,7 @@ comp_plot <- function(data_ob,data_pr=NULL,n1=NULL,n2=NULL,cc=NULL,data_type="pr
     xaxt <- rep(c(rep("n",nr-1),"s"),nc) # Set up vector so that x axes plot only on the bottom row
     yaxt <- c(rep("s",nr),rep("n",n.panels-nr)) # Set up vector so that y axes plot only on the leftmost column
   }
-
+  mode(data_ob) <- "numeric"
   x <- as.numeric(colnames(data_ob))
 
   if(is.null(ylim)){
@@ -84,6 +84,7 @@ comp_plot <- function(data_ob,data_pr=NULL,n1=NULL,n2=NULL,cc=NULL,data_type="pr
                 border=NA,col=colFill)
       }
       if(!is.null(data_pr)){ # add predicted values from comp matrix of same dimensions
+        mode(data_pr) <- "numeric"
         points(x,data_pr[r,paste(x)],type="l",lwd=2)
       }
 

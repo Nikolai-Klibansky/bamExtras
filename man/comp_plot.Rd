@@ -21,7 +21,7 @@ comp_plot(
   cex_n = 1.3,
   cex_year = 1.3,
   fillComp = TRUE,
-  colFill = rgb(0, 0, 0, 0.5),
+  colFill = rgb(0, 0, 0, 0.25),
   vlines = NULL,
   signif_cc = 3,
   ...
@@ -55,13 +55,13 @@ Plot age or length composition data
 }
 \examples{
 \dontrun{
-# read in commercial handline age comps used in the recent stock assessment
-x <- rdat_BlackSeaBass$comp.mats$acomp.cHL.ob
+# read in commercial handline age comps used in the rex.ob <- rdat_BlackSeaBass$comp.mats$acomp.cHL.ob
+x.pr <- rdat_BlackSeaBass$comp.mats$acomp.cHL.pr
 n <- rdat_BlackSeaBass$t.series[rownames(x),c("acomp.cHL.n","acomp.cHL.nfish")]
 # Plot comps by year
-comp_plot(x)
+comp_plot(data_ob=x.ob,data_pr = x.pr)
 # Add sample sizes
-comp_plot(x,n1=n[,1],n2=n[,2])
+comp_plot(data_ob=x.ob,data_pr = x.pr, n1=n[,1],n2=n[,2])
 # Plot comps and add catch curves (note the log-transformation of the composition data)
 comp_plot(log(x),cc=catch_curve(x),fillComp = FALSE,ylab= "log(proportion)",xlab="age",title="black sea bass commercial handline catch curves")
 }

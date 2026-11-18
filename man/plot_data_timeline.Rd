@@ -8,9 +8,11 @@ plot_data_timeline(
   rdat,
   key_data_type_abb = c(L = "landings", D = "discards", U = "index", acomp = "age comp",
     lcomp = "length comp"),
-  key_fleet_abb = c(cHL = "com handline", cOT = "com other", cLL = "com longline", rGN =
-    "rec general", rHB = "rec headboat", rHB.D = "rec headboat discards", sTV =
-    "SERFS trap video"),
+  key_fleet_abb = c(cGN = "com general", cGD = "com general disc", cHL = "com handline",
+    cHD = "com handline discards", cPT = "com pots", cPD = "com pots discards", cOT =
+    "com other", cOD = "com other discards", cLL = "com longline", cLD =
+    "com longline discards", rGN = "rec general", rGD = "rec general discards", rHB =
+    "rec headboat", rHD = "rec headboat discards", sTV = "SERFS trap video"),
   data_types = c("L", "D", "U", "acomp", "lcomp"),
   FUN_col = "rainbow",
   t.series.row.trunc = 1
@@ -44,7 +46,7 @@ plot_data_timeline(rdat,data_types = c("acomp","lcomp"),FUN_col = "viridis")
 
 }
 \author{
-Kyle Shertzer and Nikolai Klibansky
+Nikolai Klibansky
 }
 \keyword{assessment}
 \keyword{bam}

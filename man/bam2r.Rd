@@ -2,24 +2,9 @@
 % Please edit documentation in R/bam2r.r
 \name{bam2r}
 \alias{bam2r}
-\alias{bam_to_r}
 \title{BAM inputs to R object conversion function}
 \usage{
 bam2r(
-  CommonName = NULL,
-  init = NULL,
-  dat_file = NULL,
-  tpl_file = NULL,
-  cxx_file = NULL,
-  dat_obj = NULL,
-  tpl_obj = NULL,
-  cxx_obj = NULL,
-  object_labels = list(bounded_point = c("init", "lower", "upper", "phase", "prior_mean",
-    "prior_var", "prior_pdf"), bounded_vector = c("lower", "upper", "phase")),
-  is_bam = TRUE
-)
-
-bam_to_r(
   CommonName = NULL,
   init = NULL,
   dat_file = NULL,

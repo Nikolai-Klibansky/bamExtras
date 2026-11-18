@@ -7,7 +7,7 @@
 #' @param data_types  data types to include in plot
 #' @param t.series.row.trunc truncate rows of t.series object by this value to avoid plotting projection year or show what available data would look like in retrospective runs
 #' @keywords bam stock assessment fisheries population dynamics
-#' @author Kyle Shertzer and Nikolai Klibansky
+#' @author Nikolai Klibansky
 #' @export
 #' @examples
 #' \dontrun{
@@ -30,13 +30,21 @@ plot_data_timeline <- function(rdat,
                                                 "U"="index",
                                                 "acomp"="age comp",
                                                 "lcomp"="length comp"),
-                               key_fleet_abb=c("cHL"   = "com handline",
-                                             "cOT"   = "com other",
-                                             "cLL"   = "com longline",
-                                             "rGN"   = "rec general",
-                                             "rHB"   = "rec headboat",
-                                             "rHB.D" = "rec headboat discards",
-                                             "sTV"   = "SERFS trap video"),
+                               key_fleet_abb=c(
+                                 "cGN"   = "com general",
+                                 "cGD"   = "com general disc",                                                                             "cHL"   = "com handline",
+                                 "cHD"   = "com handline discards",
+                                 "cPT"   = "com pots",
+                                 "cPD"   = "com pots discards",
+                                 "cOT"   = "com other",
+                                 "cOD"   = "com other discards",
+                                 "cLL"   = "com longline",
+                                 "cLD"   = "com longline discards",
+                                 "rGN"   = "rec general",
+                                 "rGD"   = "rec general discards",
+                                 "rHB"   = "rec headboat",
+                                 "rHD"   = "rec headboat discards",
+                                 "sTV"   = "SERFS trap video"),
                                data_types = c("L","D","U","acomp","lcomp"),
                                FUN_col="rainbow",
                                t.series.row.trunc = 1
