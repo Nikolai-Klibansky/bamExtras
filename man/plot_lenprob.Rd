@@ -21,9 +21,11 @@ Requires that plot.matrix package be installed to plot properly
 }
 \examples{
 \dontrun{
-# As of 2026-11-09 only two rdat stored in bamExtras contains \code{lenprob.mats}. All BAM models have these lenprob matrices in the tpl file but they aren't usually passed to the rdat in the cxx file.
-plot_lenprob(rdat_GrayTriggerfish)
+# Most rdat stored in bamExtras contains an list called lenprob.mats and many have multiple matrices within the list.
 plot_lenprob(rdat_BlackSeaBass)
+plot_lenprob(rdat_GagGrouper)
+plot_lenprob(rdat_GrayTriggerfish)
+plot_lenprob(rdat_VermilionSnapper)
 # Change the color palette
 plot_lenprob(rdat_GrayTriggerfish,plot_args=list(col=heat.colors))
 # I think it's kind of nice to have the color for values near zero to contrast strongly with the rest of the color palette.

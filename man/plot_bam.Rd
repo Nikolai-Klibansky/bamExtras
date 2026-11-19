@@ -12,6 +12,7 @@ plot_bam(
   years_plot = NULL,
   FGPlot_args = list(),
   windows_args = list(),
+  windows_call = TRUE,
   Bound.vec.plots.args = list(),
   BSR.time.plots.args = list(),
   CLD.total.plots.args = list(),
@@ -38,16 +39,77 @@ plot_bam(
 
 \item{graphics.type}{from FishGraph help: 'a vector of graphics file types to which graphics are saved. When NULL, no plots are saved.'}
 
-\item{draft}{from FishGraph help: 'modifies plots for use in a report. When FALSE main titles are omitted.'}
+\item{draft}{'modifies plots for use in a report. When FALSE main titles are omitted.' (\link[FishGraph:Bound.vec.plots]{see FishGraph help files})}
 
-\item{use.color}{from FishGraph help: 'plots are made in grayscale when FALSE'}
+\item{use.color}{'plots are made in grayscale when FALSE' (\link[FishGraph:Bound.vec.plots]{see FishGraph help files})}
 
 \item{years_plot}{vector of years to plot in time series. If NULL, all years are plotted}
 
 \item{FGPlot_args}{set of arguments to pass to all FishGraph plotting functions}
+
+\item{windows_args}{list of arguments to \code{\link[grDevices:windows]{grDevices::windows()}} function run prior to a call to each FishGraph plotting function to format plot dimensions. For example: \code{windows_args = list(Bound.vec =   list(width =  8, height = 8, record = TRUE, CLD.total =   list(width =  7, height = 5, record = TRUE))}}
+
+\item{windows_call}{logical. Should windows be called to format plot dimensions? If FALSE, you won't see individual graphics device windows pop up on the screen, but it may actually take slightly longer to run the function.}
+
+\item{Bound.vec.plots.args}{List of arguments to pass to \code{BSR.time.plots}}
+
+\item{CLD.total.plots.args}{List of arguments to pass to \code{CLD.total.plots}}
+
+\item{Cohort.plots.args}{List of arguments to pass to \code{Cohort.plots}}
+
+\item{Comp.plots.args}{List of arguments to pass to \code{Comp.plots}}
+
+\item{Comp.yearly.plots.args}{List of arguments to pass to \code{Comp.yearly.plots}}
+
+\item{Eq.plots.args}{List of arguments to pass to \code{Eq.plots}}
+
+\item{F.time.plots.args}{List of arguments to pass to \code{F.time.plots}}
+
+\item{Growth.plots.args}{List of arguments to pass to \code{Growth.plots}}
+
+\item{Index.plots.args}{List of arguments to pass to \code{Index.plots}}
+
+\item{Landings.plots.args}{List of arguments to pass to \code{Landings.plots}}
+
+\item{NFZ.age.plots.args}{List of arguments to pass to \code{NFZ.age.plots}}
+
+\item{Parm.plots.args}{List of arguments to pass to \code{Parm.plots}}
+
+\item{PerRec.plots.args}{List of arguments to pass to \code{PerRec.plots}}
+
+\item{Phase.plots.args}{List of arguments to pass to \code{Phase.plots}}
+
+\item{Selectivity.plots.args}{List of arguments to pass to \code{Selectivity.plots}}
+
+\item{StockRec.plots.args}{List of arguments to pass to \code{StockRec.plots}}
 }
 \description{
 A generic plotting function that calls plotting functions from FishGraph and bamExtras.
+}
+\details{
+Additional details...\cr\cr
+Defaults to the \code{windows_args} argument are set internally, but can be overridden by user input:
+\preformatted{
+ windows_args_default = list(
+   Bound.vec =   list(width =  8, height = 8, record = TRUE),
+   BSR.time =    list(width =  8, height = 8, record = TRUE),
+   CLD.total =   list(width =  7, height = 5, record = TRUE),
+   Cohort =      list(width = 10, height = 8, record = TRUE),
+   Comp =        list(width =  7, height = 7, record = TRUE),
+   Comp.yearly = list(width =  6, height = 6, record = TRUE),
+   Eq =          list(width =  7, height = 5, record = TRUE),
+   F.time =      list(width =  7, height = 5, record = TRUE),
+   Growth =      list(width =  7, height = 5, record = TRUE),
+   Index =       list(width =  7, height = 7, record = TRUE),
+   Landings =    list(width =  7, height = 5, record = TRUE),
+   NFZ.age =     list(width =  7, height = 5, record = TRUE),
+   Parm =        list(width =  8, height = 6, record = TRUE),
+   PerRec =      list(width =  7, height = 5, record = TRUE),
+   Phase =       list(width =  7, height = 5, record = TRUE),
+   Selectivity = list(width =  7, height = 5, record = TRUE, xpos = 10, ypos = 10),
+   StockRec =    list(width =  7, height = 5, record = TRUE, xpos = 10, ypos = 10)
+)
+}
 }
 \examples{
 \dontrun{
@@ -55,8 +117,11 @@ A generic plotting function that calls plotting functions from FishGraph and bam
 plot_bam(rdat_BlackSeaBass)
 }
 }
-\keyword{MCBE}
+\author{
+Nikolai Klibansky
+}
 \keyword{assessment}
 \keyword{bam}
 \keyword{fisheries}
+\keyword{plot}
 \keyword{stock}

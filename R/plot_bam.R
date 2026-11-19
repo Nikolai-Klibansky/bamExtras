@@ -3,11 +3,54 @@
 #' A generic plotting function that calls plotting functions from FishGraph and bamExtras.
 #' @param spp bam output rdat object
 #' @param graphics.type from FishGraph help: 'a vector of graphics file types to which graphics are saved. When NULL, no plots are saved.'
-#' @param draft from FishGraph help: 'modifies plots for use in a report. When FALSE main titles are omitted.'
-#' @param use.color from FishGraph help: 'plots are made in grayscale when FALSE'
+#' @param draft 'modifies plots for use in a report. When FALSE main titles are omitted.' ([see FishGraph help files][FishGraph::Bound.vec.plots])
+#' @param use.color 'plots are made in grayscale when FALSE' ([see FishGraph help files][FishGraph::Bound.vec.plots])
 #' @param years_plot vector of years to plot in time series. If NULL, all years are plotted
 #' @param FGPlot_args set of arguments to pass to all FishGraph plotting functions
-#' @keywords bam MCBE stock assessment fisheries
+#' @param windows_args list of arguments to [grDevices::windows()] function run prior to a call to each FishGraph plotting function to format plot dimensions. For example: \code{windows_args = list(Bound.vec =   list(width =  8, height = 8, record = TRUE, CLD.total =   list(width =  7, height = 5, record = TRUE))}
+#' @param windows_call logical. Should windows be called to format plot dimensions? If FALSE, you won't see individual graphics device windows pop up on the screen, but it may actually take slightly longer to run the function.
+#' @param Bound.vec.plots.args List of arguments to pass to \code{BSR.time.plots}
+#' @param CLD.total.plots.args List of arguments to pass to \code{CLD.total.plots}
+#' @param Cohort.plots.args List of arguments to pass to \code{Cohort.plots}
+#' @param Comp.plots.args List of arguments to pass to \code{Comp.plots}
+#' @param Comp.yearly.plots.args List of arguments to pass to \code{Comp.yearly.plots}
+#' @param Eq.plots.args List of arguments to pass to \code{Eq.plots}
+#' @param F.time.plots.args List of arguments to pass to \code{F.time.plots}
+#' @param Growth.plots.args List of arguments to pass to \code{Growth.plots}
+#' @param Index.plots.args List of arguments to pass to \code{Index.plots}
+#' @param Landings.plots.args List of arguments to pass to \code{Landings.plots}
+#' @param NFZ.age.plots.args List of arguments to pass to \code{NFZ.age.plots}
+#' @param Parm.plots.args List of arguments to pass to \code{Parm.plots}
+#' @param PerRec.plots.args List of arguments to pass to \code{PerRec.plots}
+#' @param Phase.plots.args List of arguments to pass to \code{Phase.plots}
+#' @param Selectivity.plots.args List of arguments to pass to \code{Selectivity.plots}
+#' @param StockRec.plots.args List of arguments to pass to \code{StockRec.plots}
+#' @details
+#' Additional details...\cr\cr
+#' Defaults to the `windows_args` argument are set internally, but can be overridden by user input:
+#' \preformatted{
+#'  windows_args_default = list(
+#'    Bound.vec =   list(width =  8, height = 8, record = TRUE),
+#'    BSR.time =    list(width =  8, height = 8, record = TRUE),
+#'    CLD.total =   list(width =  7, height = 5, record = TRUE),
+#'    Cohort =      list(width = 10, height = 8, record = TRUE),
+#'    Comp =        list(width =  7, height = 7, record = TRUE),
+#'    Comp.yearly = list(width =  6, height = 6, record = TRUE),
+#'    Eq =          list(width =  7, height = 5, record = TRUE),
+#'    F.time =      list(width =  7, height = 5, record = TRUE),
+#'    Growth =      list(width =  7, height = 5, record = TRUE),
+#'    Index =       list(width =  7, height = 7, record = TRUE),
+#'    Landings =    list(width =  7, height = 5, record = TRUE),
+#'    NFZ.age =     list(width =  7, height = 5, record = TRUE),
+#'    Parm =        list(width =  8, height = 6, record = TRUE),
+#'    PerRec =      list(width =  7, height = 5, record = TRUE),
+#'    Phase =       list(width =  7, height = 5, record = TRUE),
+#'    Selectivity = list(width =  7, height = 5, record = TRUE, xpos = 10, ypos = 10),
+#'    StockRec =    list(width =  7, height = 5, record = TRUE, xpos = 10, ypos = 10)
+#')
+#' }
+#' @keywords bam plot stock assessment fisheries
+#' @author Nikolai Klibansky
 #' @export
 #' @examples
 #' \dontrun{
@@ -22,6 +65,7 @@ plot_bam <- function(spp=NULL,
                      years_plot = NULL,
                      FGPlot_args=list(),
                      windows_args=list(),
+                     windows_call=TRUE,
                      Bound.vec.plots.args = list(),
                      BSR.time.plots.args = list(),
                      CLD.total.plots.args = list(),
@@ -136,27 +180,28 @@ if(is.null(years_plot)){
   }
 
   ### Bound.vec.plots ###
-  do.call(windows,args=windows_args$Bound.vec)
+  if(windows_call){do.call(windows,args=windows_args$Bound.vec)}
   plot_fn("Bound.vec.plots")
 
   ### BSR ###
-  do.call(windows,args=windows_args$BSR.time)
+  if(windows_call){do.call(windows,args=windows_args$BSR.time)}
   plot_fn("BSR.time.plots")
 
   ### CLD ###
-  do.call(windows,args=windows_args$CLD.total)
+  if(windows_call){do.call(windows,args=windows_args$CLD.total)}
   plot_fn("CLD.total.plots")
 
   ### comp ###
-  do.call(windows,args=windows_args$Comp)
+  if(windows_call){do.call(windows,args=windows_args$Comp)}
   plot_fn("Comp.plots")
 
   ### compyr ###
-  do.call(windows,args=windows_args$Comp.yearly)
+  if(windows_call){do.call(windows,args=windows_args$Comp.yearly)}
   plot_fn("Comp.yearly.plots")
 
-  do.call(windows,args=windows_args$Cohort)
+  if(windows_call){do.call(windows,args=windows_args$Cohort)}
   plot_fn("Cohort.plots")
+
   # if(!is.null(Cohort.plots.args)){
   #   cat("\nRunning Cohort.plots\n")
   #   # only include args that are in the function formals
@@ -167,47 +212,47 @@ if(is.null(years_plot)){
   # }
 
   ### EQ ###
-  do.call(windows,args=windows_args$Eq)
+  if(windows_call){do.call(windows,args=windows_args$Eq)}
   plot_fn("Eq.plots")
 
   ### F ###
-  do.call(windows,args=windows_args$F.time)
+  if(windows_call){do.call(windows,args=windows_args$F.time)}
   plot_fn("F.time.plots")
 
   ### growth ###
-  do.call(windows,args=windows_args$Growth)
+  if(windows_call){do.call(windows,args=windows_args$Growth)}
   plot_fn("Growth.plots")
 
   ### index ###
-  do.call(windows,args=windows_args$Index)
+  if(windows_call){do.call(windows,args=windows_args$Index)}
   plot_fn("Index.plots")
 
   ### L ###
-  do.call(windows,args=windows_args$Landings)
+  if(windows_call){do.call(windows,args=windows_args$Landings)}
   plot_fn("Landings.plots")
 
   ### NFZ.age ###
-  do.call(windows,args=windows_args$NFZ.age)
+  if(windows_call){do.call(windows,args=windows_args$NFZ.age)}
   plot_fn("NFZ.age.plots")
 
   ### parms ###
-  do.call(windows,args=windows_args$Parm)
+  if(windows_call){do.call(windows,args=windows_args$Parm)}
   plot_fn("Parm.plots")
 
   ### phase ###
-  do.call(windows,args=windows_args$Phase)
+  if(windows_call){do.call(windows,args=windows_args$Phase)}
   plot_fn("Phase.plots")
 
   ### PR ###
-  do.call(windows,args=windows_args$PerRec)
+  if(windows_call){do.call(windows,args=windows_args$PerRec)}
   plot_fn("PerRec.plots")
 
   ### sel ###
-  do.call(windows,args=windows_args$Selectivity)
+  if(windows_call){do.call(windows,args=windows_args$Selectivity)}
   plot_fn("Selectivity.plots")
 
   ### SR ###
-  do.call(windows,args=windows_args$StockRec)
+  if(windows_call){do.call(windows,args=windows_args$StockRec)}
   plot_fn("StockRec.plots")
 
   graphics.off()

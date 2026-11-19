@@ -10,7 +10,7 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' # Most rdat stored in bamExtras contains \code{lenprob.mats} and many have multiple matrices within the list.
+#' # Most rdat stored in bamExtras contains an list called lenprob.mats and many have multiple matrices within the list.
 #' plot_lenprob(rdat_BlackSeaBass)
 #' plot_lenprob(rdat_GagGrouper)
 #' plot_lenprob(rdat_GrayTriggerfish)
