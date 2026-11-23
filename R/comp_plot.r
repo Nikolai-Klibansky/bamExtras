@@ -37,8 +37,9 @@ comp_plot <- function(data_ob,data_pr=NULL,n1=NULL,n2=NULL,cc=NULL,data_type="pr
                       fillComp=TRUE, colFill=rgb(0,0,0,0.25), vlines=NULL,
                       signif_cc=3,
                       ...){
-
-  #ellipse.list <- list(...) # Assign stuff from ellipse to a list
+  if(!is.matrix(data_ob)){data_ob <- as.matrix(data_ob)
+  message("data_ob coerced to matrix")
+  }
 
   # Calculate dimensions of plot matrix
   nr <- ceiling(sqrt(nrow(data_ob))) # Determine number of rows in figure
