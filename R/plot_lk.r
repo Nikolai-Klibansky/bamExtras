@@ -8,12 +8,10 @@
 #' @author Nikolai Klibansky
 #' @export
 #' @examples
-#' \dontrun{
 #' plot_lk(rdat_BlackSeaBass)
 #' plot_lk(rdat_RedSnapper)
 #' plot_lk(rdat_Cobia)
 #' plot_lk(rdat_AtlanticMenhaden)
-#' }
 #'
 
 plot_lk <- function(spp,par_args=list(),digits=6){

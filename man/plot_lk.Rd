@@ -17,12 +17,10 @@ plot_lk(spp, par_args = list(), digits = 6)
 Plot likelihood component values values found in bam output (spp$like) as barplot
 }
 \examples{
-\dontrun{
 plot_lk(rdat_BlackSeaBass)
 plot_lk(rdat_RedSnapper)
 plot_lk(rdat_Cobia)
 plot_lk(rdat_AtlanticMenhaden)
-}
 
 }
 \author{
